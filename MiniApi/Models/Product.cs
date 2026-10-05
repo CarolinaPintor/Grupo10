@@ -2,15 +2,15 @@ namespace Products.API.Models;
 
 public class Product
 {
-    public Guid Id;
-    public string Nombre;
-    public string Descripcion;
-    public decimal Precio;
-    public int Stock;
-    public string Categoria;
-    public DateTime FechaCreacion;
+    public Guid Id { get; set; };
+    public string Nombre { get; set; } = string.Empty;
+    public string? Descripcion { get; set; }
+    public decimal Precio { get; set; };
+    public int Stock { get; set; }
+    public string Categoria { get; set; } = string.Empty;
+    public DateTime FechaCreacion { get; set; }
 
-   public Product(guid Id, string Nombre, string Descripcion, decimal Precio, int Stock, string Categoria, DateTime FechaCreacion)
+   public Product(Guid Id, string Nombre, string Descripcion, decimal Precio, int Stock, string Categoria, DateTime FechaCreacion)
     {
         this.Id = Id;
         this.Nombre = Nombre;
