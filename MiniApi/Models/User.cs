@@ -1,14 +1,14 @@
-public clss User
+public class User
 {
-    public Guid Id;
-public string Nombre;
-public string Apellido;
-public string Email;
-public string PasswordHash;
-public DateTime FechaRegistro;
-public bool Activo;
-public int IntentosFallidos;
-public User(guid Id, string Nombre, string Apellido, string Email, string PasswordHash, DateTime FechaRegistro, bool Activo, int IntentosFallidos)
+public Guid Id { get;set; }
+public string Nombre { get; set; } =string.empty;
+public string Apellido { get; set; } = string.empty;
+    public string Email { get; set; } = string.empty;
+    public string PasswordHash { get; set; } = string.empty;
+    public DateTime FechaRegistro { get; set; }
+public bool Activo { get; set; }
+public int IntentosFallidos { get; set;}
+public User(Guid Id, string Nombre, string Apellido, string Email, string PasswordHash, DateTime FechaRegistro, bool Activo, int IntentosFallidos)
 {
     this.Id = Id;
     this.Nombre = Nombre;
@@ -16,7 +16,7 @@ public User(guid Id, string Nombre, string Apellido, string Email, string Passwo
     this.Email = Email;
     this.PasswordHash = PasswordHash;
     this.FechaRegistro = FechaRegistro;
-    this.Activo = Activo;
-    this.IntentosFallidos = IntentosFallidos;
+    this.Activo = true;
+    this.IntentosFallidos = 0;
 }
 }
