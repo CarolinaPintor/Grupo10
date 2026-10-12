@@ -2,7 +2,7 @@ public class Order
 {
     public Guid Id;
 
-    public Guid UsuarioID;
+    public Guid UsuarioId;
     public OrderItem[] Items;
     public decimal Total;
     public string Estado;
