@@ -2,10 +2,10 @@ namespace Products.API.Models;
 
 public class Product
 {
-    public Guid Id { get; set; };
+    public Guid Id { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public string? Descripcion { get; set; } //de esta forma Descripcion puede ser null
-    public decimal Precio { get; set; };
+    public decimal Precio { get; set; }
     public int Stock { get; set; }
     public string Categoria { get; set; } = string.Empty; //de esta forma Categoria no puede ser null
     public DateTime FechaCreacion { get; set; }

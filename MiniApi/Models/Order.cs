@@ -2,7 +2,7 @@ public class Order
 {
     public Guid Id;
 
-    public Guid UsuarioID;
+    public Guid UsuarioId;
     public OrderItem[] Items;
     public decimal Total;
     public string Estado;
@@ -19,7 +19,7 @@ public class Order
     {
         Id = Guid.NewGuid();
         UsuarioId = usuarioId;
-        Items = items?.ToList() ?? new List<OrderItem>();
+        Items = items?.ToArray() ?? Array.Empty<OrderItem>();
         Total = Items.Sum(item => item.Cantidad * item.PrecioUnitario);
         Estado = "Pendiente";
         FechaCreacion = DateTime.UtcNow;

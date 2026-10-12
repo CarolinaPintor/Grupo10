@@ -18,9 +18,6 @@ public partial class Program
         // 3. Inicializar DB
         using (var scope = app.Services.CreateScope())
             scope.ServiceProvider.GetRequiredService<DatabaseInitializer>().Initialize();
-        // Log de ejemplo
-        var logger = app.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogError("OK");
         
         // 4. Middleware (Swagger UI, Serilog, HealthChecks)
         app.UseAppMiddleware(); 
