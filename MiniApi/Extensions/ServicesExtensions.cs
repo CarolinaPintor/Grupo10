@@ -1,4 +1,5 @@
 ﻿using MiniApi.Data;
+using MiniApi.ExceptionHandlers;
 using MiniApi.HealthChecks;
 
 namespace MiniApi.Extensions
@@ -9,6 +10,13 @@ namespace MiniApi.Extensions
         {
             services.AddSingleton<DatabaseInitializer>();
             services.AddScoped<ItemRepository>();
+            // Orden: los más específicos primero, el global al final
+            services.AddExceptionHandler<NotFoundExceptionHandler>();
+            services.AddExceptionHandler<BusinessRuleExceptionHandler>();
+            services.AddExceptionHandler<ValidationExceptionHandler>();
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
