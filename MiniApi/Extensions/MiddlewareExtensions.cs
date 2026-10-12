@@ -25,6 +25,9 @@ namespace MiniApi.Extensions
 
             app.UseMiddleware<AuditMiddleware>();
 
+            // Va después de Audit para que la respuesta de error también quede auditada
+            app.UseExceptionHandler();
+
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
