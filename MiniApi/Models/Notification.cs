@@ -16,7 +16,7 @@ public class Notification
 
     // Fecha y hora de envío (Asignado automáticamente al registrar/enviar).
 
-    public DateTime FechaEnvio 
+    public DateTime FechaEnvio;
 
     public Notification()
     {
