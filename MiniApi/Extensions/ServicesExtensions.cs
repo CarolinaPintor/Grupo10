@@ -10,6 +10,9 @@ namespace MiniApi.Extensions
         {
             services.AddSingleton<DatabaseInitializer>();
             services.AddScoped<ItemRepository>();
+            //agrego el repositorio de usuarios
+            services.AddScoped<UserRepository>();
+
             // Orden: los más específicos primero, el global al final
             services.AddExceptionHandler<NotFoundExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
