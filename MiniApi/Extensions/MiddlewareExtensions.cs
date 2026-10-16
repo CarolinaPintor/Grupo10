@@ -9,6 +9,9 @@ namespace MiniApi.Extensions
     {
         public static void UseAppMiddleware(this WebApplication app)
         {
+            // Primero de todos, para que el resto del pipeline ya tenga el CorrelationId
+            app.UseMiddleware<CorrelationIdMiddleware>();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
