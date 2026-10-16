@@ -48,6 +48,25 @@ namespace MiniApi.Data
             );
             """);
 
+            //tabla de carritos (un carrito por usuario)
+            connection.Execute("""
+            CREATE TABLE IF NOT EXISTS cart (
+                usuario_id           TEXT PRIMARY KEY,
+                fecha_actualizacion  TEXT NOT NULL
+            );
+            """);
+
+            //tabla de items del carrito
+            connection.Execute("""
+            CREATE TABLE IF NOT EXISTS cart_items (
+                usuario_id   TEXT    NOT NULL,
+                producto_id  TEXT    NOT NULL,
+                cantidad     INTEGER NOT NULL CHECK (cantidad > 0),
+                PRIMARY KEY (usuario_id, producto_id),
+                FOREIGN KEY (usuario_id) REFERENCES cart (usuario_id)
+            );
+            """);
+
             _logger.LogInformation("SQLite inicializado correctamente → {db}", connectionString);
         }
     }
