@@ -9,6 +9,7 @@ namespace MiniApi.Extensions
         public static void AddAppServices(this IServiceCollection services)
         {
             services.AddSingleton<DatabaseInitializer>();
+            services.AddScoped<CartRepository>();
             services.AddScoped<ItemRepository>();
             // Orden: los más específicos primero, el global al final
             services.AddExceptionHandler<NotFoundExceptionHandler>();
