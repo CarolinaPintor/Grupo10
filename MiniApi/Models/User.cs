@@ -1,3 +1,5 @@
+namespace MiniApi.Models;
+
 public class User
 {
 public Guid Id { get;set; }
@@ -16,7 +18,7 @@ public User(Guid Id, string Nombre, string Apellido, string Email, string Passwo
     this.Email = Email;
     this.PasswordHash = PasswordHash;
     this.FechaRegistro = FechaRegistro;
-    this.Activo = true;
-    this.IntentosFallidos = 0;
-}
+    this.Activo = Activo;
+    this.IntentosFallidos = IntentosFallidos;
+    }
 }
