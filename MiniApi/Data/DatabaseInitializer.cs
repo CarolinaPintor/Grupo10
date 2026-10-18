@@ -34,7 +34,21 @@ namespace MiniApi.Data
                 updated_at  TEXT
             );
         """);
-            //tabla de usuarios
+
+            // Tabla de productos
+            connection.Execute("""
+            CREATE TABLE IF NOT EXISTS products (
+                id             TEXT PRIMARY KEY,
+                nombre         TEXT NOT NULL,
+                descripcion    TEXT,
+                precio         REAL NOT NULL,
+                stock          INTEGER NOT NULL,
+                categoria      TEXT NOT NULL,
+                fecha_creacion TEXT NOT NULL
+            );
+            """);
+
+            // Tabla de usuarios
             connection.Execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id                 TEXT    PRIMARY KEY,
@@ -48,7 +62,7 @@ namespace MiniApi.Data
             );
             """);
 
-            //tabla de carritos (un carrito por usuario)
+            // Tabla de carritos (un carrito por usuario)
             connection.Execute("""
             CREATE TABLE IF NOT EXISTS cart (
                 usuario_id           TEXT PRIMARY KEY,
@@ -56,7 +70,7 @@ namespace MiniApi.Data
             );
             """);
 
-            //tabla de items del carrito
+            // Tabla de items del carrito
             connection.Execute("""
             CREATE TABLE IF NOT EXISTS cart_items (
                 usuario_id   TEXT    NOT NULL,
