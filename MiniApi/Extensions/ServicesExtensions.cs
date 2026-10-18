@@ -1,6 +1,7 @@
 ﻿using MiniApi.Data;
 using MiniApi.ExceptionHandlers;
 using MiniApi.HealthChecks;
+using MiniApi.Services;
 
 namespace MiniApi.Extensions
 {
@@ -11,6 +12,9 @@ namespace MiniApi.Extensions
             services.AddSingleton<DatabaseInitializer>();
             services.AddScoped<CartRepository>();
             services.AddScoped<ItemRepository>();
+            services.AddScoped<ProductRepository>();
+            services.AddScoped<ProductService>();
+
             // Orden: los más específicos primero, el global al final
             services.AddExceptionHandler<NotFoundExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
