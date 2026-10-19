@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using MiniApi.Common;
 using MiniApi.Data;
 using MiniApi.DTOs;
 using MiniApi.Exceptions;
