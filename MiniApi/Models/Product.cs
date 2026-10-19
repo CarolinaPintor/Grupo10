@@ -10,6 +10,11 @@ public class Product
     public string Categoria { get; set; } = string.Empty; //de esta forma Categoria no puede ser null
     public DateTime FechaCreacion { get; set; }
 
+    // Constructor sin parámetros: lo necesitan Dapper y los object initializers del servicio
+    public Product()
+    {
+    }
+
    public Product(Guid Id, string Nombre, string Descripcion, decimal Precio, int Stock, string Categoria, DateTime FechaCreacion)
     {
         this.Id = Id;
