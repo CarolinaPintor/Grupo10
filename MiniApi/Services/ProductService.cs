@@ -4,6 +4,9 @@ using MiniApi.DTOs;
 using MiniApi.Exceptions;
 using MiniApi.Models;
 
+// Hay otra ValidationException en DataAnnotations: se indica cuál usar
+using ValidationException = MiniApi.Exceptions.ValidationException;
+
 namespace MiniApi.Services;
 
 public class ProductService
