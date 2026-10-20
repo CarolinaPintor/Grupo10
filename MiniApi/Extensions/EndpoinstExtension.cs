@@ -8,7 +8,9 @@ public static class EndpointsExtensions
 {
     public static void MapAppEndpoints(this WebApplication app)
     {
-        // ALUMNOS: se agregan  
+          
         app.MapItemEndpoints();
+        // se agregan los endpoints de usuario
+        app.MapUserEndpoints();
     }
 }

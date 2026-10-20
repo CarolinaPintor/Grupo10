@@ -1,6 +1,7 @@
 ﻿using MiniApi.Data;
 using MiniApi.ExceptionHandlers;
 using MiniApi.HealthChecks;
+using MiniApi.Services;
 
 namespace MiniApi.Extensions
 {

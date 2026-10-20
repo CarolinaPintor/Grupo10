@@ -3,7 +3,7 @@ using MiniApi.Common;
 using MiniApi.Data;
 using MiniApi.DTOs;
 using MiniApi.Exceptions;
-using MiniApi.Models; 
+using MiniApi.Models;
 
 namespace MiniApi.Services;
 
@@ -18,6 +18,14 @@ public class UserService
 
     public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest request)
     {
+        // Validar que el email tenga un formato básico correcto
+        if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains("@"))
+        {
+            // Corrección: Usamos una List<string> y la constante ErrorCodes.USR_002
+            var errores = new List<string> { "El formato del correo electrónico es inválido." };
+            throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, errores);
+        }
+
         //  Validar formato de datos (USR-002)
         List<ValidationResult> resultadosValidacion = new List<ValidationResult>();
         ValidationContext contextoValidacion = new ValidationContext(request);
@@ -26,7 +34,7 @@ public class UserService
         if (!esValido)
         {
             IEnumerable<string> errores = resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
-            throw new ValidationException(ErrorCodes.USR_002, errores);
+            throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, errores);
         }
 
         // Validar la regla de email duplicado (USR-001)
@@ -40,16 +48,17 @@ public class UserService
         string contrasenaHasheada = PasswordHasher.Hash(request.Password);
 
         // Creo la entidad User 
-        User nuevoUsuario = new User(
-            Guid.NewGuid(),
-            request.Nombre,
-            request.Apellido,
-            request.Email,
-            contrasenaHasheada,
-            DateTime.UtcNow,
-            true,
-            0
-        );
+        User nuevoUsuario = new User
+        {
+            Id = Guid.NewGuid(),
+            Nombre = request.Nombre,
+            Apellido = request.Apellido,
+            Email = request.Email,
+            PasswordHash = contrasenaHasheada,
+            FechaRegistro = DateTime.UtcNow,
+            Activo = true,
+            IntentosFallidos = 0
+        };
 
         // Guardar el nuevo usuario en la base de datos
         await _userRepository.CreateAsync(nuevoUsuario);
