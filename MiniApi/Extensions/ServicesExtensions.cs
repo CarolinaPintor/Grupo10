@@ -20,6 +20,10 @@ namespace MiniApi.Extensions
             services.AddExceptionHandler<NotFoundExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
             services.AddExceptionHandler<ValidationExceptionHandler>();
+
+            services.AddExceptionHandler<UnauthorizedExceptionHandler>();
+            services.AddExceptionHandler<ForbiddenExceptionHandler>();
+
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
