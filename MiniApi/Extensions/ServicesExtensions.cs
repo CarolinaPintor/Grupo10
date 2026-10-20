@@ -11,6 +11,7 @@ namespace MiniApi.Extensions
         {
             services.AddSingleton<DatabaseInitializer>();
             services.AddScoped<CartRepository>();
+            services.AddScoped<CartService>();
             services.AddScoped<ItemRepository>();
             services.AddScoped<ProductRepository>();
             services.AddScoped<ProductService>();
