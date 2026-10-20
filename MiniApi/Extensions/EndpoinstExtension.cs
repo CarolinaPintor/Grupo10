@@ -10,5 +10,7 @@ public static class EndpointsExtensions
     {
         // ALUMNOS: se agregan  
         app.MapItemEndpoints();
+
+        app.MapProductEndpoints();
     }
 }
