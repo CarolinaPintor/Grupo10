@@ -18,5 +18,17 @@ public static class UsersEndpointsExtension
             return Results.Created($"/api/users/{respuesta.Id}", respuesta);
         })
         .WithTags("Users"); // Esto agrupa el endpoint visualmente en Swagger
+
+        // Endpoint POST para iniciar sesión (C07)
+        app.MapPost("/api/users/login", async (LoginRequest peticion, UserService servicioUsuarios) =>
+        {
+            // 1. Le pasamos el DTO de entrada al servicio, que es el "cerebro" de la operación (C06)
+            LoginResponse respuesta = await servicioUsuarios.LoginAsync(peticion);
+
+            // 2. Si el servicio no lanzó ninguna excepción, significa que la contraseña era correcta.
+            // Devolvemos un código HTTP 200 (OK) junto con el DTO seguro (que no tiene la contraseña).
+            return Results.Ok(respuesta);
+        })
+        .WithTags("Users"); // Agrupa este endpoint en la misma sección "Users" de Swagger
     }
 }
