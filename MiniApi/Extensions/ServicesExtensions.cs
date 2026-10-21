@@ -15,11 +15,19 @@ namespace MiniApi.Extensions
             services.AddScoped<ItemRepository>();
             services.AddScoped<ProductRepository>();
             services.AddScoped<ProductService>();
+            //agrego el repositorio de usuarios
+            services.AddScoped<UserRepository>();
+            //agrego el servicio de usuarios
+            services.AddScoped<UserService>();
 
             // Orden: los más específicos primero, el global al final
             services.AddExceptionHandler<NotFoundExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
             services.AddExceptionHandler<ValidationExceptionHandler>();
+
+            services.AddExceptionHandler<UnauthorizedExceptionHandler>();
+            services.AddExceptionHandler<ForbiddenExceptionHandler>();
+
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
