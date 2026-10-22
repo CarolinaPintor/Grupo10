@@ -101,3 +101,4 @@ public static class ProductEndpointsExtension
         .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }
+//Desconozco como agregar los ejemplos de swagger, pero aca los tags ya estan agregados
