@@ -80,6 +80,30 @@ namespace MiniApi.Data
                 FOREIGN KEY (usuario_id) REFERENCES cart (usuario_id)
             );
             """);
+            // --- Tabla de órdenes ---
+            connection.Execute("""
+            CREATE TABLE IF NOT EXISTS orders (
+                id             TEXT PRIMARY KEY,
+                usuario_id     TEXT NOT NULL,
+                total          REAL NOT NULL,
+                estado         TEXT NOT NULL,
+                fecha_creacion TEXT NOT NULL,
+                FOREIGN KEY (usuario_id) REFERENCES users (id)
+            );
+            """);
+
+            // ---Tabla de items de la orden ---
+            connection.Execute("""
+            CREATE TABLE IF NOT EXISTS order_items (
+                id              TEXT PRIMARY KEY,
+                order_id        TEXT NOT NULL,
+                producto_id     TEXT NOT NULL,
+                cantidad        INTEGER NOT NULL,
+                precio_unitario REAL NOT NULL,
+                FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
+                FOREIGN KEY (producto_id) REFERENCES products (id)
+            );
+            """);
 
             _logger.LogInformation("SQLite inicializado correctamente → {db}", connectionString);
         }
