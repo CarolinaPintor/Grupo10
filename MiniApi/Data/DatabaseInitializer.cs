@@ -81,6 +81,18 @@ namespace MiniApi.Data
             );
             """);
 
+            // Tabla de notificaciones
+            connection.Execute("""
+            CREATE TABLE IF NOT EXISTS notifications (
+                id           TEXT PRIMARY KEY,
+                usuario_id   TEXT NOT NULL,
+                mensaje      TEXT NOT NULL,
+                tipo         TEXT NOT NULL,
+                estado       TEXT NOT NULL,
+                fecha_envio  TEXT NOT NULL
+            );
+            """);
+
             _logger.LogInformation("SQLite inicializado correctamente → {db}", connectionString);
         }
     }

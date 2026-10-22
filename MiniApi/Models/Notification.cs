@@ -1,23 +1,25 @@
+namespace MiniApi.Models;
+
 public class Notification
 {
     // Identificador único de la notificación.
-    public Guid Id;
+    public Guid Id { get; set; }
 
 
     // Identificador del usuario destinatario.
-    public Guid UsuarioId;
-    public string Mensaje;
+    public Guid UsuarioId { get; set; }
+    public string Mensaje { get; set; } = string.Empty;
 
     // Tipo de notificación: Email | Push | SMS.
-    public string Tipo;
+    public string Tipo { get; set; } = string.Empty;
 
     // Estado de la notificación: Pendiente | Enviada | Fallida.
-    public string Estado;
+    public string Estado { get; set; } = string.Empty;
 
     // Fecha y hora de envío (Asignado automáticamente al registrar/enviar).
+    public DateTime FechaEnvio { get; set; }
 
-    public DateTime FechaEnvio;
-
+    // Constructor sin parámetros requerido por Dapper
     public Notification()
     {
         Id = Guid.NewGuid();
