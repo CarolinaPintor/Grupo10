@@ -67,5 +67,40 @@ public static class CartEndpointsExtension
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // DELETE: quitar un producto del carrito
+        group.MapDelete("/{userId:guid}/items/{productId:guid}", async (
+            Guid userId,
+            Guid productId,
+            CartService service) =>
+        {
+            await service.RemoveItemAsync(userId, productId);
+            return Results.NoContent();
+        })
+        .WithName("RemoveCartItem")
+        .WithSummary("Quitar un producto del carrito")
+        .WithDescription(
+            "Elimina el producto del carrito. Responde CRT-001 si el usuario no tiene carrito " +
+            "y CRT-002 si el producto no estaba en el carrito.")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
+
+        // DELETE: vaciar el carrito completo
+        group.MapDelete("/{userId:guid}", async (
+            Guid userId,
+            CartService service) =>
+        {
+            await service.ClearAsync(userId);
+            return Results.NoContent();
+        })
+        .WithName("ClearCart")
+        .WithSummary("Vaciar el carrito completo")
+        .WithDescription(
+            "Elimina el carrito del usuario con todos sus items. " +
+            "Responde CRT-001 si el usuario no tiene carrito.")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }
