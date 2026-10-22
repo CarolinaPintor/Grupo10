@@ -24,12 +24,24 @@ public static class ProductEndpointsExtension
             return Results.Ok(product);
         });
 
+        /*// POST
+        group.MapPost("/", async (CreateProductRequest request, ProductService service) =>
+        {
+            var product = await service.CreateAsync(request);
+            return Results.Created($"/api/products/{product.Id}", product);
+        });*/
         // POST
         group.MapPost("/", async (CreateProductRequest request, ProductService service) =>
         {
             var product = await service.CreateAsync(request);
             return Results.Created($"/api/products/{product.Id}", product);
-        });
+        })
+        .WithName("CreateProduct")
+        .WithSummary("Crear un nuevo producto")
+        .Produces<ProductResponse>(StatusCodes.Status201Created)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // PUT
         group.MapPut("/{id:guid}", async (Guid id, UpdateProductRequest request, ProductService service) =>
