@@ -2,6 +2,7 @@
 using MiniApi.ExceptionHandlers;
 using MiniApi.HealthChecks;
 using MiniApi.Services;
+using MiniApi.Common;
 
 namespace MiniApi.Extensions
 {
@@ -32,7 +33,11 @@ namespace MiniApi.Extensions
             services.AddProblemDetails();
 
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(options =>
+            {
+                options.OperationFilter<UsersSwaggerFilter>();
+            });
 
             services.AddHealthChecks()
                 .AddCheck<SqliteHealthCheck>("sqlite-db", tags: ["database"])

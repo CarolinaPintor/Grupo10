@@ -2,33 +2,33 @@ using Microsoft.AspNetCore.Http;
 using MiniApi.DTOs;
 using MiniApi.Services;
 
-namespace MiniApi.Extensions.Endpoints;
-
-public static class UsersEndpointsExtension
+namespace MiniApi.Extensions.Endpoints
 {
-    public static void MapUserEndpoints(this WebApplication app)
+    public static class UsersEndpointsExtension
     {
-        // Endpoint POST para registrar un usuario
-        app.MapPost("/api/users/register", async (RegisterUserRequest peticion, UserService servicioUsuarios) =>
+        public static void MapUserEndpoints(this WebApplication app)
         {
-            // Le pasamos el DTO de entrada a nuestro servicio 
-            RegisterResponse respuesta = await servicioUsuarios.RegisterAsync(peticion);
+            // Endpoint POST para registrar un usuario (C05 + C08)
+            app.MapPost("/api/users/register", async (RegisterUserRequest peticion, UserService servicioUsuarios) =>
+            {
+                RegisterResponse respuesta = await servicioUsuarios.RegisterAsync(peticion);
+                return Results.Created($"/api/users/{respuesta.Id}", respuesta);
+            })
+            .WithTags("Users")
+            .Produces<RegisterResponse>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status409Conflict);
 
-            // Si todo salió bien, devolvemos HTTP 201 (Created) y el DTO de respuesta
-            return Results.Created($"/api/users/{respuesta.Id}", respuesta);
-        })
-        .WithTags("Users"); // Esto agrupa el endpoint visualmente en Swagger
-
-        // Endpoint POST para iniciar sesión (C07)
-        app.MapPost("/api/users/login", async (LoginRequest peticion, UserService servicioUsuarios) =>
-        {
-            // 1. Le pasamos el DTO de entrada al servicio, que es el "cerebro" de la operación (C06)
-            LoginResponse respuesta = await servicioUsuarios.LoginAsync(peticion);
-
-            // 2. Si el servicio no lanzó ninguna excepción, significa que la contraseña era correcta.
-            // Devolvemos un código HTTP 200 (OK) junto con el DTO seguro (que no tiene la contraseña).
-            return Results.Ok(respuesta);
-        })
-        .WithTags("Users"); // Agrupa este endpoint en la misma sección "Users" de Swagger
+            // Endpoint POST para iniciar sesión (C07 + C08)
+            app.MapPost("/api/users/login", async (LoginRequest peticion, UserService servicioUsuarios) =>
+            {
+                LoginResponse respuesta = await servicioUsuarios.LoginAsync(peticion);
+                return Results.Ok(respuesta);
+            })
+            .WithTags("Users")
+            .Produces<LoginResponse>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden);
+        }
     }
-}
+}   
