@@ -2,6 +2,7 @@
 using MiniApi.ExceptionHandlers;
 using MiniApi.HealthChecks;
 using MiniApi.Services;
+using MiniApi.Common;
 
 namespace MiniApi.Extensions
 {
@@ -11,19 +12,34 @@ namespace MiniApi.Extensions
         {
             services.AddSingleton<DatabaseInitializer>();
             services.AddScoped<CartRepository>();
+            services.AddScoped<CartService>();
             services.AddScoped<ItemRepository>();
             services.AddScoped<ProductRepository>();
             services.AddScoped<ProductService>();
+            //agrego el repositorio de usuarios
+            services.AddScoped<UserRepository>();
+            //agrego el servicio de usuarios
+            services.AddScoped<UserService>();
+            // Agrego el repositorio de notificaciones
+            services.AddScoped<NotificationRepository>();
 
             // Orden: los más específicos primero, el global al final
             services.AddExceptionHandler<NotFoundExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
             services.AddExceptionHandler<ValidationExceptionHandler>();
+
+            services.AddExceptionHandler<UnauthorizedExceptionHandler>();
+            services.AddExceptionHandler<ForbiddenExceptionHandler>();
+
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(options =>
+            {
+                options.OperationFilter<UsersSwaggerFilter>();
+            });
 
             services.AddHealthChecks()
                 .AddCheck<SqliteHealthCheck>("sqlite-db", tags: ["database"])

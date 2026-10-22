@@ -1,0 +1,9 @@
+### Prueba de Registro Exitoso
+POST http://localhost:5112/api/users/register
+Content-Type: application/json
+{
+  "nombre": "Carolina",
+  "apellido": "Pintos",
+  "email": "carolina.ailentest.com",
+  "password": "Password123"
+}

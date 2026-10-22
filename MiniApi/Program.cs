@@ -12,7 +12,8 @@ public partial class Program
         builder.AddAppLogging();
         
         // 2. Servicios (Swagger, HealthChecks, Dapper, etc.)
-        builder.Services.AddAppServices(); 
+        builder.Services.AddAppServices();
+        Dapper.SqlMapper.AddTypeHandler(new MiniApi.Data.GuidTypeHandler());
         var app = builder.Build();
         
         // 3. Inicializar DB
