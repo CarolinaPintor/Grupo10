@@ -61,11 +61,18 @@ public static class ProductEndpointsExtension
         .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        // DELETE
-        group.MapDelete("/{id:guid}", async (Guid id, ProductService service) =>
+        // DELETE: eliminar un producto
+        group.MapDelete("/{id:guid}", async (
+            Guid id,
+            ProductService service) =>
         {
             await service.DeleteAsync(id);
             return Results.NoContent();
-        });
+        })
+        .WithName("DeleteProduct")
+        .WithSummary("Eliminar un producto existente")
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }
