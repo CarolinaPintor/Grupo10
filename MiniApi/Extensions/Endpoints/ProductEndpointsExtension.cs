@@ -43,12 +43,23 @@ public static class ProductEndpointsExtension
         .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
 
-        // PUT
-        group.MapPut("/{id:guid}", async (Guid id, UpdateProductRequest request, ProductService service) =>
+
+        // PUT: actualizar un producto
+        group.MapPut("/{id:guid}", async (
+            Guid id,
+            UpdateProductRequest request,
+            ProductService service) =>
         {
             var product = await service.UpdateAsync(id, request);
             return Results.Ok(product);
-        });
+        })
+        .WithName("UpdateProduct")
+        .WithSummary("Actualizar un producto existente")
+        .Produces<ProductResponse>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .ProducesProblem(StatusCodes.Status500InternalServerError);
 
         // DELETE
         group.MapDelete("/{id:guid}", async (Guid id, ProductService service) =>
