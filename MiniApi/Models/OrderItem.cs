@@ -1,8 +1,8 @@
 public class OrderItem
 {
-    public Guid ProductoId;
-    public int Cantidad;
-    public decimal PrecioUnitario;
+    public Guid ProductoId { get; set; }
+    public int Cantidad { get; set; }
+    public decimal PrecioUnitario { get; set; }
 
     public OrderItem(Guid ProductoId, int Cantidad, decimal PrecioUnitario)
     {
