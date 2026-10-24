@@ -1,9 +1,48 @@
-### Prueba de Registro Exitoso
+### ============================================================================
+### PRUEBAS C12: POST /api/notifications/send (Éxito, NTF-001 y NTF-002)
+### ============================================================================
+
+@baseUrl = http://localhost:5112
+# Reemplazá este GUID por el "id" real de un usuario registrado en tu app.db:
+@usuarioExistenteId = abf63ac6-3353-48f3-bec0-d087652c6869
+
+### 1. Éxito (201 Created) - Envía notificación a un usuario existente con tipo válido
+POST {{baseUrl}}/api/notifications/send
+Content-Type: application/json
+
+{
+  "usuarioId": "{{usuarioExistenteId}}",
+  "mensaje": "Su orden #f1e2d3c4 fue confirmada.",
+  "tipo": "Email"
+}
+
+### 2. Error NTF-001 (404 Not Found) - El usuarioId no existe en la tabla users
+POST {{baseUrl}}/api/notifications/send
+Content-Type: application/json
+
+{
+  "usuarioId": "99999999-9999-9999-9999-999999999999",
+  "mensaje": "Su orden #f1e2d3c4 fue confirmada.",
+  "tipo": "Email"
+}
+
+### 3. Error NTF-002 (400 Bad Request) - Tipo no reconocido ("WhatsApp") y mensaje vacío
+POST {{baseUrl}}/api/notifications/send
+Content-Type: application/json
+
+{
+  "usuarioId": "{{usuarioExistenteId}}",
+  "mensaje": "",
+  "tipo": "WhatsApp"
+}
+
+### ============================================================================
 POST http://localhost:5112/api/users/register
 Content-Type: application/json
+
 {
-  "nombre": "Carolina",
-  "apellido": "Pintos",
-  "email": "carolina.ailentest.com",
+  "nombre": "Mariana",
+  "apellido": "López",
+  "email": "mariana.lopez@ejemplo.com",
   "password": "Password123"
 }
