@@ -20,7 +20,7 @@ public class NotificationService
         _userRepository = userRepository;
     }
 
-    // C11: Lógica de negocio para enviar/registrar una notificación (NTF-001 y NTF-002)
+    // Lógica de negocio para enviar/registrar una notificación (NTF-001 y NTF-002)
     public async Task<NotificationResponse> SendAsync(SendNotificationRequest request)
     {
         // 1. Validación de datos de entrada (NTF-002 -> HTTP 400 Bad Request)
@@ -55,7 +55,40 @@ public class NotificationService
             FechaEnvio = notification.FechaEnvio
         };
     }
-    
+    // Consultar historial de notificaciones de un usuario (NTF-001 y NTF-003)
+    public async Task<IEnumerable<NotificationResponse>> GetByUserIdAsync(Guid userId)
+    {
+        // 1. Verificar que el usuario exista en la base de datos (NTF-001 -> HTTP 404 Not Found)
+        var usuario = await _userRepository.GetByIdAsync(userId);
+        if (usuario is null)
+        {
+            throw new NotFoundException(
+                "NTF-001",
+                "El usuario destinatario no fue encontrado.");
+        }
+
+        // 2. Buscar las notificaciones registradas para ese usuario
+        var notificaciones = (await _notificationRepository.GetByUserIdAsync(userId)).ToList();
+
+        // 3. Si no tiene notificaciones registradas, devolver error NTF-003 (HTTP 404 Not Found)
+        if (notificaciones.Count == 0)
+        {
+            throw new NotFoundException(
+                "NTF-003",
+                "No se encontraron notificaciones para el usuario.");
+        }
+
+        // 4. Mapear las entidades a DTOs de respuesta
+        return notificaciones.Select(n => new NotificationResponse
+        {
+            Id = n.Id,
+            UsuarioId = n.UsuarioId,
+            Mensaje = n.Mensaje,
+            Tipo = n.Tipo,
+            Estado = n.Estado,
+            FechaEnvio = n.FechaEnvio
+        });
+    }
     private static void ValidarRequest(SendNotificationRequest? request)
     {
         if (request is null)

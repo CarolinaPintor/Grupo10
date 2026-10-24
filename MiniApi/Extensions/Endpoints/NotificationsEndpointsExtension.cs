@@ -15,5 +15,13 @@ public static class NotificationsEndpointsExtension
             return Results.Created($"/api/notifications/{respuesta.Id}", respuesta);
         })
         .WithTags("Notifications");
+
+        // Endpoint GET para consultar las notificaciones de un usuario
+        app.MapGet("/api/notifications/{userId:guid}", async (Guid userId, NotificationService servicioNotificaciones) =>
+        {
+            IEnumerable<NotificationResponse> notificaciones = await servicioNotificaciones.GetByUserIdAsync(userId);
+            return Results.Ok(notificaciones);
+        })
+        .WithTags("Notifications");
     }
 }

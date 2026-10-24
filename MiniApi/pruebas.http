@@ -1,10 +1,14 @@
 ### ============================================================================
-### PRUEBAS C12: POST /api/notifications/send (Éxito, NTF-001 y NTF-002)
+### VARIABLES GLOBALES PARA PRUEBAS DE NOTIFICACIONES
 ### ============================================================================
 
 @baseUrl = http://localhost:5112
-# Reemplazá este GUID por el "id" real de un usuario registrado en tu app.db:
 @usuarioExistenteId = abf63ac6-3353-48f3-bec0-d087652c6869
+@usuarioSinNotificacionesId = 00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### PRUEBAS C12: POST /api/notifications/send (Éxito, NTF-001 y NTF-002)
+### ============================================================================
 
 ### 1. Éxito (201 Created) - Envía notificación a un usuario existente con tipo válido
 POST {{baseUrl}}/api/notifications/send
@@ -37,12 +41,30 @@ Content-Type: application/json
 }
 
 ### ============================================================================
-POST http://localhost:5112/api/users/register
+### AUXILIAR: Registrar un usuario nuevo sin notificaciones (Mariana)
+### ============================================================================
+POST {{baseUrl}}/api/users/register
 Content-Type: application/json
 
 {
   "nombre": "Mariana",
   "apellido": "López",
-  "email": "mariana.lopez@ejemplo.com",
+  "email": "mariana.lopez@ejemplo0.com",
   "password": "Password123"
 }
+
+### ============================================================================
+### PRUEBAS C13: GET /api/notifications/{userId} (Éxito 200, NTF-003 y NTF-001)
+### ============================================================================
+
+### 1. Éxito (200 OK) - Devuelve la lista de notificaciones del usuario de C12
+GET {{baseUrl}}/api/notifications/{{usuarioExistenteId}}
+Accept: application/json
+
+### 2. Error NTF-003 (404 Not Found) - Usuario válido pero sin notificaciones registradas
+GET {{baseUrl}}/api/notifications/{{usuarioSinNotificacionesId}}
+Accept: application/json
+
+### 3. Error NTF-001 (404 Not Found) - El userId no existe en la tabla users
+GET {{baseUrl}}/api/notifications/99999999-9999-9999-9999-999999999999
+Accept: application/json
