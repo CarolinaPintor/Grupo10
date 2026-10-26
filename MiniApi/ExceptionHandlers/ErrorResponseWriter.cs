@@ -1,3 +1,5 @@
+using MiniApi.Middleware;
+
 namespace MiniApi.ExceptionHandlers;
 
 // Arma la respuesta de error con el formato del contrato (ProblemDetails + errorCode y errorMessage).
@@ -27,7 +29,8 @@ public static class ErrorResponseWriter
             detail,
             instance = context.Request.Path.Value,
             errorCode,
-            errorMessage
+            errorMessage,
+            correlationId = context.Items[CorrelationIdMiddleware.ItemKey]
         }, options: null, contentType: "application/problem+json", cancellationToken: cancellationToken);
     }
 }
