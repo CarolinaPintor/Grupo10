@@ -22,7 +22,10 @@ namespace MiniApi.Extensions
             services.AddScoped<UserService>();
             // Agrego el repositorio de notificaciones
             services.AddScoped<NotificationRepository>();
-            services.AddScoped<NotificationService>(); 
+            services.AddScoped<NotificationService>();
+            // agrego el repositorio de órdenes
+            services.AddScoped<OrderRepository>();
+            services.AddScoped<OrderService>();
 
             // Orden: los más específicos primero, el global al final
             services.AddExceptionHandler<NotFoundExceptionHandler>();
