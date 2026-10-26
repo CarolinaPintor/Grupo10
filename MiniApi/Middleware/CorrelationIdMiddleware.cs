@@ -1,3 +1,5 @@
+using Serilog.Context;
+
 namespace MiniApi.Middleware
 {
     // Asigna un X-Correlation-Id a cada request: usa el que llega en el header o genera uno nuevo.
@@ -27,7 +29,11 @@ namespace MiniApi.Middleware
                 return Task.CompletedTask;
             });
 
-            await _next(context);
+            // Todos los logs del request llevan el CorrelationId
+            using (LogContext.PushProperty("CorrelationId", correlationId))
+            {
+                await _next(context);
+            }
         }
     }
 }
