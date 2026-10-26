@@ -1,6 +1,8 @@
-﻿using Serilog;
+﻿using MiniApi.Middleware;
+using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
+using Serilog.Formatting.Json;
 
 namespace MiniApi.Extensions
 {
@@ -42,6 +44,21 @@ namespace MiniApi.Extensions
                     .WriteTo.File(
                         path: "logs/audit.log",
                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} | {RequestMethod} | {RequestPath} | {StatusCode} | {CorrelationId}{NewLine}",
+                        rollingInterval: RollingInterval.Day))
+
+                // LOG JSON: formato estructurado con Timestamp, Level, Servicio, Endpoint, CorrelationId y ErrorCode.
+                // Se excluye AuditMiddleware porque registra el body de los requests (incluye contraseñas).
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByExcluding(Matching.FromSource<AuditMiddleware>())
+                    .Filter.ByExcluding(Matching.FromSource("System.Net.Http")) // HealthChecks UI consultando /health
+                    .Filter.ByExcluding(le =>
+                        le.Properties.TryGetValue("RequestPath", out var pathValue) &&
+                        pathValue is ScalarValue scalar && scalar.Value is string path &&
+                        (path.Contains("/health", StringComparison.OrdinalIgnoreCase) ||
+                         path.Contains("/swagger", StringComparison.OrdinalIgnoreCase)))
+                    .WriteTo.File(
+                        formatter: new JsonFormatter(renderMessage: true),
+                        path: "logs/app.json",
                         rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
