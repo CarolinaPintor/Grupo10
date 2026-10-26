@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using MiniApi.Data;
 using MiniApi.DTOs;
 using MiniApi.Exceptions;
@@ -51,18 +52,25 @@ namespace MiniApi.Services
 
             var orderItems = new List<OrderItem>();
 
-            // ORD-005: Recorrer con foreach y acumulador, validando productos y stock
+            // Recorrer con foreach y acumulador, validando productos y stock
             foreach (var itemDto in request.Items)
             {
                 var product = await _productRepository.GetByIdAsync(itemDto.ProductoId);
+
+                // Producto inexistente corregido a ORD-004 (404)
                 if (product == null)
                 {
-                    throw new NotFoundException(ErrorCodes.ORD_005, $"No se encontró el producto con ID '{itemDto.ProductoId}'.");
+                    throw new NotFoundException(ErrorCodes.ORD_004, $"No se encontró el producto con ID '{itemDto.ProductoId}'.");
                 }
 
+                // Stock insuficiente con Status422UnprocessableEntity como tercer parámetro
                 if (product.Stock < itemDto.Cantidad)
                 {
-                    throw new BusinessRuleException(ErrorCodes.ORD_005, $"Stock insuficiente para el producto '{product.Nombre}'. Stock disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.");
+                    throw new BusinessRuleException(
+                        ErrorCodes.ORD_005,
+                        $"Stock insuficiente para el producto '{product.Nombre}'. Stock disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.",
+                        StatusCodes.Status422UnprocessableEntity
+                    );
                 }
 
                 orderItems.Add(new OrderItem(product.Id, itemDto.Cantidad, product.Precio));
