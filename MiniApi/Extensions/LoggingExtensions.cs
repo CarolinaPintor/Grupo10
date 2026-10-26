@@ -13,6 +13,7 @@ namespace MiniApi.Extensions
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Diagnostics", LogEventLevel.Information)
                 .Enrich.FromLogContext()
+                .Enrich.WithProperty("Servicio", "MiniApi")
 
                 // ALUMNO: LOG DE CONSOLA: libre para usarse como quieran
                 .WriteTo.Logger(lc => lc
