@@ -11,6 +11,7 @@ namespace MiniApi.Extensions
         {
             // Primero de todos, para que el resto del pipeline ya tenga el CorrelationId
             app.UseMiddleware<CorrelationIdMiddleware>();
+            app.UseMiddleware<RequestLogContextMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {
