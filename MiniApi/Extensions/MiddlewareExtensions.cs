@@ -36,6 +36,13 @@ namespace MiniApi.Extensions
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
+            // Liveness: la app está viva. No ejecuta ningún check, solo confirma que responde
+            app.MapHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = _ => false,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
             app.MapHealthChecksUI(setup => setup.UIPath = "/health-ui");
         }
     }
