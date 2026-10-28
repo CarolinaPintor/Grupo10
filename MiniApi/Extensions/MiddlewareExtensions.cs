@@ -13,11 +13,9 @@ namespace MiniApi.Extensions
             app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseMiddleware<RequestLogContextMiddleware>();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            // Swagger disponible en todos los entornos: el enunciado pide /swagger en cada servicio
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseSerilogRequestLogging(options =>
             {
