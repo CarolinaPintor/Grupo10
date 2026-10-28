@@ -43,6 +43,13 @@ namespace MiniApi.Extensions
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
 
+            // Readiness: la app puede atender requests. Ejecuta solo los checks de la base de datos
+            app.MapHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = check => check.Tags.Contains("database"),
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
             app.MapHealthChecksUI(setup => setup.UIPath = "/health-ui");
         }
     }
