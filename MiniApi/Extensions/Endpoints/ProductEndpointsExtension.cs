@@ -98,7 +98,8 @@ public static class ProductEndpointsExtension
             "Elimina el producto indicado por su GUID si existe.")
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
         .ProducesProblem(StatusCodes.Status500InternalServerError);
     }
 }
-//Desconozco como agregar los ejemplos de swagger, pero aca los tags ya estan agregados
+//Descubrí como agregar los ejemplos del swagger, ya fueron agregados y he de testearlos.

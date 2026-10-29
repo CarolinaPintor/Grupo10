@@ -39,6 +39,7 @@ namespace MiniApi.Extensions
             services.AddSwaggerGen(options =>
             {
                 options.OperationFilter<UsersSwaggerFilter>();
+                options.OperationFilter<ProductsSwaggerFilter>();
             });
 
             services.AddHealthChecks()
