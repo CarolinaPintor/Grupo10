@@ -18,31 +18,39 @@ public class UsersSwaggerFilter : IOperationFilter
         {
             ConfigurarEjemplosLogin(operation);
         }
+        else if (path == "api/notifications/send")
+        {
+            ConfigurarEjemplosEnviarNotificacion(operation);
+        }
+        else if (path != null && path.StartsWith("api/notifications/"))
+        {
+            ConfigurarEjemplosObtenerNotificaciones(operation);
+        }
     }
-
+    //Actualizo algunos ejemplos según la consigna
     private static void ConfigurarEjemplosRegistro(OpenApiOperation operation)
     {
         operation.Summary = "Registra un nuevo usuario en el sistema";
         operation.Description = "Crea una cuenta de usuario validando formato de datos (USR-002) y unicidad de email (USR-001).";
 
-        // 1. Ejemplo de Request (Solicitud)
+        // 1. Ejemplo de Request (Idéntico a la consigna)
         SetRequestExample(operation, """
         {
-          "nombre": "Ana",
-          "apellido": "García",
-          "email": "ana.garcia@ejemplo.com",
-          "password": "Password123"
+          "nombre": "María",
+          "apellido": "González",
+          "email": "maria@email.com",
+          "password": "MiPassword123!"
         }
         """);
 
         // 2. Ejemplo 201 Created
         SetResponseExample(operation, "201", "application/json", """
         {
-          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "nombre": "Ana",
-          "apellido": "García",
-          "email": "ana.garcia@ejemplo.com",
-          "fechaRegistro": "2026-10-21T18:30:00Z",
+          "id": "a1b2c3d4-0000-0000-0000-111122223333",
+          "nombre": "María",
+          "apellido": "González",
+          "email": "maria@email.com",
+          "fechaRegistro": "2024-03-10T09:00:00Z",
           "activo": true
         }
         """);
@@ -56,11 +64,7 @@ public class UsersSwaggerFilter : IOperationFilter
           "detail": "Los datos proporcionados no son válidos.",
           "instance": "/api/users/register",
           "errorCode": "USR-002",
-          "errorMessage": "El formato del email no es válido.",
-          "errors": [
-            "El formato del email no es válido.",
-            "La contraseña debe tener al menos 6 caracteres."
-          ]
+          "errorMessage": "El formato del email no es válido."
         }
         """);
 
@@ -83,21 +87,21 @@ public class UsersSwaggerFilter : IOperationFilter
         operation.Summary = "Autentica a un usuario existente";
         operation.Description = "Verifica las credenciales del usuario. Bloquea la cuenta tras 3 intentos fallidos consecutivos.";
 
-        // 1. Ejemplo de Request (Solicitud)
+        // 1. Ejemplo de Request (Usando los datos de María González)
         SetRequestExample(operation, """
         {
-          "email": "ana.garcia@ejemplo.com",
-          "password": "Password123"
+          "email": "maria@email.com",
+          "password": "MiPassword123!"
         }
         """);
 
         // 2. Ejemplo 200 OK
         SetResponseExample(operation, "200", "application/json", """
         {
-          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "nombre": "Ana",
-          "apellido": "García",
-          "email": "ana.garcia@ejemplo.com"
+          "id": "a1b2c3d4-0000-0000-0000-111122223333",
+          "nombre": "María",
+          "apellido": "González",
+          "email": "maria@email.com"
         }
         """);
 
@@ -158,6 +162,92 @@ public class UsersSwaggerFilter : IOperationFilter
                 }
             };
         }
+    }
+
+    private static void ConfigurarEjemplosEnviarNotificacion(OpenApiOperation operation)
+    {
+        operation.Summary = "Envía y registra una notificación para un usuario";
+        operation.Description = "Valida los datos de entrada (NTF-002) y verifica que el usuario destinatario exista (NTF-001).";
+
+        // 1. Ejemplo de Request
+        SetRequestExample(operation, """
+        {
+          "usuarioId": "a1b2c3d4-0000-0000-0000-111122223333",
+          "mensaje": "Su orden #f1e2d3c4 fue confirmada.",
+          "tipo": "Email"
+        }
+        """);
+
+        // 2. Ejemplo 201 Created
+        SetResponseExample(operation, "201", "application/json", """
+        {
+          "id": "b1c2d3e4-5678-90ab-cdef-111122223333",
+          "usuarioId": "a1b2c3d4-0000-0000-0000-111122223333",
+          "mensaje": "Su orden #f1e2d3c4 fue confirmada.",
+          "tipo": "Email",
+          "estado": "Enviada",
+          "fechaEnvio": "2024-03-10T15:31:00Z"
+        }
+        """);
+
+        // 3. Ejemplo 400 Bad Request (NTF-002)
+        SetResponseExample(operation, "400", "application/problem+json", """
+        {
+          "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+          "title": "Bad Request",
+          "status": 400,
+          "detail": "Los datos proporcionados no son válidos.",
+          "instance": "/api/notifications/send",
+          "errorCode": "NTF-002",
+          "errorMessage": "Los datos de la notificación son inválidos."
+        }
+        """);
+
+        // 4. Ejemplo 404 Not Found (NTF-001)
+        SetResponseExample(operation, "404", "application/problem+json", """
+        {
+          "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "El recurso solicitado no fue encontrado.",
+          "instance": "/api/notifications/send",
+          "errorCode": "NTF-001",
+          "errorMessage": "El usuario destinatario no fue encontrado."
+        }
+        """);
+    }
+
+    private static void ConfigurarEjemplosObtenerNotificaciones(OpenApiOperation operation)
+    {
+        operation.Summary = "Obtiene el historial de notificaciones de un usuario";
+        operation.Description = "Devuelve las notificaciones del usuario ordenadas por fecha o retorna 404 si no tiene notificaciones (NTF-003).";
+
+        // 1. Ejemplo 200 OK
+        SetResponseExample(operation, "200", "application/json", """
+        [
+          {
+            "id": "b1c2d3e4-5678-90ab-cdef-111122223333",
+            "usuarioId": "a1b2c3d4-0000-0000-0000-111122223333",
+            "mensaje": "Su orden #f1e2d3c4 fue confirmada.",
+            "tipo": "Email",
+            "estado": "Enviada",
+            "fechaEnvio": "2024-03-10T15:31:00Z"
+          }
+        ]
+        """);
+
+        // 2. Ejemplo 404 Not Found (NTF-003)
+        SetResponseExample(operation, "404", "application/problem+json", """
+        {
+          "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "El recurso solicitado no fue encontrado.",
+          "instance": "/api/notifications/a1b2c3d4-0000-0000-0000-111122223333",
+          "errorCode": "NTF-003",
+          "errorMessage": "No se encontraron notificaciones para el usuario."
+        }
+        """);
     }
 
     private static void SetRequestExample(OpenApiOperation operation, string json)
