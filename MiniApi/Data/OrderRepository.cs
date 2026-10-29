@@ -102,6 +102,39 @@ namespace MiniApi.Data
             return orders;
         }
 
+        // ── GET ALL (Con filtro opcional por usuarioId) ───────────────────────
+        public async Task<IEnumerable<Order>> GetAllAsync(Guid? usuarioId)
+        {
+            if (usuarioId.HasValue)
+            {
+                return await GetByUserIdAsync(usuarioId.Value);
+            }
+
+            using var conn = CreateConnection();
+
+            var orderRows = (await conn.QueryAsync<OrderRow>("""
+                SELECT id AS Id, usuario_id AS UsuarioId, total AS Total, 
+                       estado AS Estado, fecha_creacion AS FechaCreacion 
+                FROM orders
+            """)).ToList();
+
+            var orders = new List<Order>();
+
+            foreach (var orderRow in orderRows)
+            {
+                var itemRows = await conn.QueryAsync<OrderItemRow>("""
+                    SELECT producto_id AS ProductoId, cantidad AS Cantidad, precio_unitario AS PrecioUnitario 
+                    FROM order_items 
+                    WHERE order_id = @orderId
+                """, new { orderId = orderRow.Id });
+
+                var items = itemRows.Select(i => i.ToModel()).ToList();
+                orders.Add(orderRow.ToModel(items));
+            }
+
+            return orders;
+        }
+
         // ── ADD ───────────────────────────────────────────────────────────────
         public async Task AddAsync(Order order)
         {
@@ -156,6 +189,12 @@ namespace MiniApi.Data
                 SET estado = @estado 
                 WHERE id = @id
             """, new { id = id.ToString(), estado = nuevoEstado });
+        }
+
+        // ── UPDATE (Compatible con OrderService) ──────────────────────────────
+        public async Task UpdateAsync(Order order)
+        {
+            await UpdateStatusAsync(order.Id, order.Estado);
         }
 
         // ── HAS ACTIVE ORDERS BY PRODUCT (PRD-004) ────────────────────────────

@@ -22,6 +22,11 @@ public record CreateOrderItemRequest(
     [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser al menos 1.")]
     int Cantidad
 );
+// Request para actualizar el estado de una orden (PUT /api/orders/{id}/status)
+public record UpdateOrderStatusRequest(
+    [Required(ErrorMessage = "El estado es obligatorio.")]
+    string Estado
+);
 
 // Respuesta devuelta tras la creación exitosa de una orden (201 Created).
 public record OrderResponse(

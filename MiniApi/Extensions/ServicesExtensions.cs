@@ -45,6 +45,7 @@ namespace MiniApi.Extensions
                 options.OperationFilter<UsersSwaggerFilter>();
                 options.OperationFilter<ProductsSwaggerFilter>();
                 options.OperationFilter<CartSwaggerFilter>();
+                options.OperationFilter<OrdersSwaggerFilter>();
             });
 
             services.AddHealthChecks()

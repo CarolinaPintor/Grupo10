@@ -24,6 +24,37 @@ namespace MiniApi.Services
             _userRepository = userRepository;
         }
 
+        public async Task<IEnumerable<OrderResponse>> GetAllAsync(Guid? usuarioId)
+        {
+            var orders = await _orderRepository.GetAllAsync(usuarioId);
+            return orders.Select(o => new OrderResponse(
+                o.Id,
+                o.UsuarioId,
+                o.Items.Select(i => new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario)).ToList(),
+                o.Total,
+                o.Estado,
+                o.FechaCreacion
+            ));
+        }
+
+        public async Task<OrderResponse> GetByIdAsync(Guid id)
+        {
+            var order = await _orderRepository.GetByIdAsync(id);
+            if (order == null)
+            {
+                throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada."); // ORD-001[cite: 12]
+            }
+
+            return new OrderResponse(
+                order.Id,
+                order.UsuarioId,
+                order.Items.Select(i => new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario)).ToList(),
+                order.Total,
+                order.Estado,
+                order.FechaCreacion
+            );
+        }
+
         public async Task<OrderResponse> CreateAsync(CreateOrderRequest request)
         {
             // ORD-002: Validar formato de datos con Data Annotations
@@ -41,13 +72,13 @@ namespace MiniApi.Services
             User? user = await _userRepository.GetByIdAsync(request.UsuarioId);
             if (user == null || !user.Activo)
             {
-                throw new NotFoundException(ErrorCodes.ORD_003, $"El usuario con ID '{request.UsuarioId}' no existe o no está activo.");
+                throw new NotFoundException(ErrorCodes.ORD_003, $"El usuario con ID '{request.UsuarioId}' no existe o no está activo."); // ORD-003[cite: 12]
             }
 
-            // ORD-004: Validar que la orden contenga ítems
+            // ORD-002 / ORD-004: Validar que la orden contenga ítems
             if (request.Items == null || !request.Items.Any())
             {
-                throw new BusinessRuleException(ErrorCodes.ORD_004, "La orden debe contener al menos un ítem.");
+                throw new BusinessRuleException(ErrorCodes.ORD_002, "La orden debe contener al menos un ítem."); // ORD-002[cite: 12]
             }
 
             var orderItems = new List<OrderItem>();
@@ -57,18 +88,18 @@ namespace MiniApi.Services
             {
                 var product = await _productRepository.GetByIdAsync(itemDto.ProductoId);
 
-                // Producto inexistente corregido a ORD-004 (404)
+                // ORD-004: Producto no encontrado al crear la orden[cite: 12]
                 if (product == null)
                 {
-                    throw new NotFoundException(ErrorCodes.ORD_004, $"No se encontró el producto con ID '{itemDto.ProductoId}'.");
+                    throw new NotFoundException(ErrorCodes.ORD_004, $"No se encontró el producto con ID '{itemDto.ProductoId}'."); // ORD-004[cite: 12]
                 }
 
-                // Stock insuficiente con Status422UnprocessableEntity como tercer parámetro
+                // ORD-005: Stock insuficiente con Status422UnprocessableEntity[cite: 13]
                 if (product.Stock < itemDto.Cantidad)
                 {
                     throw new BusinessRuleException(
                         ErrorCodes.ORD_005,
-                        $"Stock insuficiente para el producto '{product.Nombre}'. Stock disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.",
+                        $"Stock insuficiente para el producto '{product.Nombre}'. Stock disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.", // ORD-005[cite: 13]
                         StatusCodes.Status422UnprocessableEntity
                     );
                 }
@@ -90,6 +121,37 @@ namespace MiniApi.Services
                 nuevaOrden.Total,
                 nuevaOrden.Estado,
                 nuevaOrden.FechaCreacion
+            );
+        }
+
+        public async Task<OrderResponse> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
+        {
+            var order = await _orderRepository.GetByIdAsync(id);
+            if (order == null)
+            {
+                throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada."); // ORD-001[cite: 12]
+            }
+
+            // ORD-006: Validar transición de estados (Ej: Entregada no puede volver a Pendiente)[cite: 14]
+            if (order.Estado == "Entregada" && request.Estado == "Pendiente")
+            {
+                throw new BusinessRuleException(
+                    ErrorCodes.ORD_006,
+                    "Una orden en estado 'Entregada' no puede volver a 'Pendiente'.", // ORD-006[cite: 14]
+                    StatusCodes.Status409Conflict
+                );
+            }
+
+            order.Estado = request.Estado;
+            await _orderRepository.UpdateAsync(order);
+
+            return new OrderResponse(
+                order.Id,
+                order.UsuarioId,
+                order.Items.Select(i => new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario)).ToList(),
+                order.Total,
+                order.Estado,
+                order.FechaCreacion
             );
         }
     }

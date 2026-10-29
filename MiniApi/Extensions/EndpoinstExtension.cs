@@ -10,6 +10,7 @@ public static class EndpointsExtensions
         app.MapItemEndpoints();
         app.MapProductEndpoints();
         app.MapCartEndpoints();
+        app.MapOrderEndpoints();
 
         // Se agregan los endpoints de usuario
         app.MapUserEndpoints();
