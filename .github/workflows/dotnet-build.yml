@@ -1,0 +1,33 @@
+name: .NET Build CI
+
+# 1. Disparadores: Cuándo se ejecuta este flujo automático
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+
+# 2. Trabajos a ejecutar en el servidor de GitHub
+jobs:
+  build:
+    name: Compilar MiniApi
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso A: Descargar el código del repositorio en la máquina virtual
+      - name: Clonar el repositorio (Checkout)
+        uses: actions/checkout@v4
+
+      # Paso B: Instalar el SDK de .NET
+      - name: Configurar .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x' # <-- Si tu MiniApi.csproj dice net8.0, cambialo a '8.0.x' (o '9.0.x' si es net9.0)
+
+      # Paso C: Descargar los paquetes NuGet (Dapper, SQLite, etc.)
+      - name: Restaurar dependencias (dotnet restore)
+        run: dotnet restore MiniApi/MiniApi.csproj
+
+      # Paso D: Compilar el proyecto verificando que haya 0 errores
+      - name: Compilar el proyecto (dotnet build)
+        run: dotnet build MiniApi/MiniApi.csproj --no-restore --configuration Release
