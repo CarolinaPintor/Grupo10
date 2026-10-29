@@ -43,6 +43,7 @@ namespace MiniApi.Extensions
             services.AddSwaggerGen(options =>
             {
                 options.OperationFilter<UsersSwaggerFilter>();
+                options.OperationFilter<ProductsSwaggerFilter>();
                 options.OperationFilter<CartSwaggerFilter>();
             });
 
