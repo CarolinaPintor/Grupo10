@@ -33,12 +33,11 @@ namespace MiniApi.Services
 
             if (!esValido || request.Items == null || !request.Items.Any())
             {
-                IEnumerable<string> errores = resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
-                string mensajeError = request.Items == null || !request.Items.Any()
-                    ? "Los datos de la orden son inválidos."
-                    : string.Join("; ", errores);
+                IEnumerable<string> errores = request.Items == null || !request.Items.Any()
+                    ? new[] { "Los datos de la orden son inválidos." }
+                    : resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
 
-                throw new ValidationException(ErrorCodes.ORD_002, mensajeError);
+                throw new ValidationException(ErrorCodes.ORD_002, errores);
             }
 
             // ORD-003: Validar que el usuario exista y esté activo (Catálogo: "Usuario no encontrado al crear la orden.")
