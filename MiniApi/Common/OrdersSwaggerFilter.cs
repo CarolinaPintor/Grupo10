@@ -39,7 +39,7 @@ public class OrdersSwaggerFilter : IOperationFilter
     private static void ConfigurarEjemplosListar(OpenApiOperation operation)
     {
         operation.Summary = "Listar órdenes";
-        operation.Description = "Devuelve el listado de órdenes registradas[cite: 13]. Permite filtrar opcionalmente por ?usuarioId=";
+        operation.Description = "Devuelve el listado de órdenes registradas. Permite filtrar opcionalmente por ?usuarioId=";
 
         // 1. Ejemplo 200 OK
         SetResponseExample(operation, "200", "application/json", $$"""
@@ -78,7 +78,7 @@ public class OrdersSwaggerFilter : IOperationFilter
     private static void ConfigurarEjemplosCrear(OpenApiOperation operation)
     {
         operation.Summary = "Crear nueva orden";
-        operation.Description = "Crea una nueva orden validando datos (ORD-002), usuario (ORD-003), productos (ORD-004) y stock (ORD-005)[cite: 13].";
+        operation.Description = "Crea una nueva orden validando datos (ORD-002), usuario (ORD-003), productos (ORD-004) y stock (ORD-005).";
 
         // 1. Ejemplo de Request
         SetRequestExample(operation, $$"""
@@ -154,7 +154,7 @@ public class OrdersSwaggerFilter : IOperationFilter
     private static void ConfigurarEjemplosObtenerPorId(OpenApiOperation operation)
     {
         operation.Summary = "Obtener detalle de una orden";
-        operation.Description = "Devuelve los datos de la orden identificada por el GUID indicado, validando existencia (ORD-001)[cite: 13].";
+        operation.Description = "Devuelve los datos de la orden identificada por el GUID indicado, validando existencia (ORD-001).";
 
         // 1. Ejemplo 200 OK
         SetResponseExample(operation, "200", "application/json", $$"""
@@ -191,7 +191,7 @@ public class OrdersSwaggerFilter : IOperationFilter
     private static void ConfigurarEjemplosActualizarEstado(OpenApiOperation operation)
     {
         operation.Summary = "Actualizar estado de la orden";
-        operation.Description = "Modifica el estado de la orden validando existencia (ORD-001) y transiciones válidas (ORD-006)[cite: 13, 14].";
+        operation.Description = "Modifica el estado de la orden validando existencia (ORD-001) y transiciones válidas (ORD-006).";
 
         // 1. Ejemplo de Request
         SetRequestExample(operation, """

@@ -1,12 +1,13 @@
+namespace MiniApi.Models;
+
 public class Order
 {
-    public Guid Id;
-
-    public Guid UsuarioId;
-    public OrderItem[] Items = Array.Empty<OrderItem>();
-    public decimal Total;
-    public string Estado;
-    public DateTime FechaCreacion;
+    public Guid Id { get; set; }
+    public Guid UsuarioId { get; set; }
+    public OrderItem[] Items { get; set; } = Array.Empty<OrderItem>();
+    public decimal Total { get; set; }
+    public string Estado { get; set; } = "Pendiente";
+    public DateTime FechaCreacion { get; set; }
 
     public Order()
     {
