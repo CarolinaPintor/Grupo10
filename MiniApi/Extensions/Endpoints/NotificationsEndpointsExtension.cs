@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using MiniApi.DTOs;
 using MiniApi.Services;
 
@@ -14,7 +15,10 @@ public static class NotificationsEndpointsExtension
             NotificationResponse respuesta = await servicioNotificaciones.SendAsync(peticion);
             return Results.Created($"/api/notifications/{respuesta.Id}", respuesta);
         })
-        .WithTags("Notifications");
+        .WithTags("Notifications")
+        .Produces<NotificationResponse>(StatusCodes.Status201Created)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status404NotFound);
 
         // Endpoint GET para consultar las notificaciones de un usuario
         app.MapGet("/api/notifications/{userId:guid}", async (Guid userId, NotificationService servicioNotificaciones) =>
@@ -22,6 +26,8 @@ public static class NotificationsEndpointsExtension
             IEnumerable<NotificationResponse> notificaciones = await servicioNotificaciones.GetByUserIdAsync(userId);
             return Results.Ok(notificaciones);
         })
-        .WithTags("Notifications");
+        .WithTags("Notifications")
+        .Produces<IEnumerable<NotificationResponse>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

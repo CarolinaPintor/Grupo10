@@ -57,18 +57,21 @@ namespace MiniApi.Services
 
         public async Task<OrderResponse> CreateAsync(CreateOrderRequest request)
         {
-            // ORD-002: Validar formato de datos con Data Annotations
+            // ORD-002: Validar formato de datos o lista de ítems vacía con Data Annotations / Reglas
             List<ValidationResult> resultadosValidacion = new List<ValidationResult>();
             ValidationContext contextoValidacion = new ValidationContext(request);
             bool esValido = Validator.TryValidateObject(request, contextoValidacion, resultadosValidacion, true);
 
-            if (!esValido)
+            if (!esValido || request.Items == null || !request.Items.Any())
             {
-                IEnumerable<string> errores = resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
+                IEnumerable<string> errores = request.Items == null || !request.Items.Any()
+                    ? new[] { "Los datos de la orden son inválidos." }
+                    : resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
+
                 throw new ValidationException(ErrorCodes.ORD_002, errores);
             }
 
-            // ORD-003: Validar que el usuario exista y esté activo
+            // ORD-003: Validar que el usuario exista y esté activo (Catálogo: "Usuario no encontrado al crear la orden.")
             User? user = await _userRepository.GetByIdAsync(request.UsuarioId);
             if (user == null || !user.Activo)
             {
