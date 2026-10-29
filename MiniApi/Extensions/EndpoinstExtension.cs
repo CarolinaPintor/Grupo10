@@ -9,8 +9,11 @@ public static class EndpointsExtensions
     {
         app.MapItemEndpoints();
         app.MapProductEndpoints();
+        app.MapCartEndpoints();
 
         // Se agregan los endpoints de usuario
         app.MapUserEndpoints();
+        // Se agregan los endpoints de notificaciones
+        app.MapNotificationEndpoints();
     }
 }
