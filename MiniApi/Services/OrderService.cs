@@ -26,28 +26,26 @@ namespace MiniApi.Services
 
         public async Task<OrderResponse> CreateAsync(CreateOrderRequest request)
         {
-            // ORD-002: Validar formato de datos con Data Annotations
+            // ORD-002: Validar formato de datos o lista de ítems vacía con Data Annotations / Reglas
             List<ValidationResult> resultadosValidacion = new List<ValidationResult>();
             ValidationContext contextoValidacion = new ValidationContext(request);
             bool esValido = Validator.TryValidateObject(request, contextoValidacion, resultadosValidacion, true);
 
-            if (!esValido)
+            if (!esValido || request.Items == null || !request.Items.Any())
             {
                 IEnumerable<string> errores = resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
-                throw new ValidationException(ErrorCodes.ORD_002, errores);
+                string mensajeError = request.Items == null || !request.Items.Any()
+                    ? "Los datos de la orden son inválidos."
+                    : string.Join("; ", errores);
+
+                throw new ValidationException(ErrorCodes.ORD_002, mensajeError);
             }
 
-            // ORD-003: Validar que el usuario exista y esté activo
+            // ORD-003: Validar que el usuario exista y esté activo (Catálogo: "Usuario no encontrado al crear la orden.")
             User? user = await _userRepository.GetByIdAsync(request.UsuarioId);
             if (user == null || !user.Activo)
             {
-                throw new NotFoundException(ErrorCodes.ORD_003, $"El usuario con ID '{request.UsuarioId}' no existe o no está activo.");
-            }
-
-            // ORD-004: Validar que la orden contenga ítems
-            if (request.Items == null || !request.Items.Any())
-            {
-                throw new BusinessRuleException(ErrorCodes.ORD_004, "La orden debe contener al menos un ítem.");
+                throw new NotFoundException(ErrorCodes.ORD_003, "Usuario no encontrado al crear la orden.");
             }
 
             var orderItems = new List<OrderItem>();
@@ -57,18 +55,18 @@ namespace MiniApi.Services
             {
                 var product = await _productRepository.GetByIdAsync(itemDto.ProductoId);
 
-                // Producto inexistente corregido a ORD-004 (404)
+                // ORD-004: Producto no encontrado al crear la orden (Catálogo oficial)
                 if (product == null)
                 {
-                    throw new NotFoundException(ErrorCodes.ORD_004, $"No se encontró el producto con ID '{itemDto.ProductoId}'.");
+                    throw new NotFoundException(ErrorCodes.ORD_004, "Producto no encontrado al crear la orden.");
                 }
 
-                // Stock insuficiente con Status422UnprocessableEntity como tercer parámetro
+                // ORD-005: Stock insuficiente (Catálogo oficial)
                 if (product.Stock < itemDto.Cantidad)
                 {
                     throw new BusinessRuleException(
                         ErrorCodes.ORD_005,
-                        $"Stock insuficiente para el producto '{product.Nombre}'. Stock disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.",
+                        $"Stock insuficiente para '{product.Nombre}'. Disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.",
                         StatusCodes.Status422UnprocessableEntity
                     );
                 }
