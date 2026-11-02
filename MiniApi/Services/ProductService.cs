@@ -12,10 +12,12 @@ namespace MiniApi.Services;
 public class ProductService
 {
     private readonly ProductRepository _repository;
+    private readonly OrderRepository _orderRepository;
 
-    public ProductService(ProductRepository repository)
+    public ProductService(ProductRepository repository, OrderRepository orderRepository)
     {
         _repository = repository;
+        _orderRepository = orderRepository;
     }
 
     public async Task<IEnumerable<ProductResponse>> GetAllAsync(string? categoria, string? nombre)
@@ -99,6 +101,12 @@ public class ProductService
         if (product is null)
         {
             throw new NotFoundException(ErrorCodes.PRD_001, $"No se encontró el producto con ID '{id}'.");
+        }
+
+        // PRD-004: no se puede eliminar un producto con órdenes Pendiente o Confirmada
+        if (await _orderRepository.HasActiveOrdersByProductAsync(id))
+        {
+            throw new BusinessRuleException(ErrorCodes.PRD_004, "El producto tiene órdenes activas y no puede eliminarse.");
         }
 
         await _repository.DeleteAsync(id);
