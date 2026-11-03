@@ -65,11 +65,13 @@ namespace MiniApi.Services
             ValidationContext contextoValidacion = new ValidationContext(request);
             bool esValido = Validator.TryValidateObject(request, contextoValidacion, resultadosValidacion, true);
 
-            if (!esValido || request.Items == null || !request.Items.Any())
+            if (!esValido || request.UsuarioId == Guid.Empty || request.Items == null || !request.Items.Any())
             {
                 IEnumerable<string> errores = request.Items == null || !request.Items.Any()
                     ? new[] { "Los datos de la orden son inválidos." }
-                    : resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
+                    : request.UsuarioId == Guid.Empty
+                        ? new[] { "El ID del usuario es obligatorio." }
+                        : resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
 
                 throw new ValidationException(ErrorCodes.ORD_002, errores);
             }
