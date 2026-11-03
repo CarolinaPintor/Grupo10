@@ -5,30 +5,30 @@ namespace MiniApi.DTOs;
 // Acá llegan los datos limpios que ingresa el usuario en el formulario.
 
 public record RegisterUserRequest(
-    [Required(ErrorMessage = "El nombre es obligatorio.")]
-    [StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
+    [property: Required(ErrorMessage = "El nombre es obligatorio.")]
+    [property: StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
     string Nombre,
 
-    [Required(ErrorMessage = "El apellido es obligatorio.")]
-    [StringLength(100, ErrorMessage = "El apellido no puede superar los 100 caracteres.")]
+    [property: Required(ErrorMessage = "El apellido es obligatorio.")]
+    [property: StringLength(100, ErrorMessage = "El apellido no puede superar los 100 caracteres.")]
     string Apellido,
 
-    [Required(ErrorMessage = "El email es obligatorio.")]
-    [EmailAddress(ErrorMessage = "El formato del email no es válido.")]
+    [property: Required(ErrorMessage = "El email es obligatorio.")]
+    [property: EmailAddress(ErrorMessage = "El formato del email no es válido.")]
     string Email,
 
-    [Required(ErrorMessage = "La contraseña es obligatoria.")]
-    [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
+    [property: Required(ErrorMessage = "La contraseña es obligatoria.")]
+    [property: MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
     string Password
 );
 
 // Request para la autenticación de un usuario (POST /api/users/login).
 public record LoginRequest(
-    [Required(ErrorMessage = "El email es obligatorio.")]
-    [EmailAddress(ErrorMessage = "El formato del email no es válido.")]
+    [property: Required(ErrorMessage = "El email es obligatorio.")]
+    [property: EmailAddress(ErrorMessage = "El formato del email no es válido.")]
     string Email,
 
-    [Required(ErrorMessage = "La contraseña es obligatoria.")]
+    [property: Required(ErrorMessage = "La contraseña es obligatoria.")]
     string Password
 );
 
