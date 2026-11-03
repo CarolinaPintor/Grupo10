@@ -141,7 +141,7 @@ namespace MiniApi.Services
             );
         }
 
-        public async Task<OrderResponse> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
+        public async Task<UpdateOrderStatusResponse> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
         {
             // ORD-002: el estado debe ser uno de los permitidos
             if (!EstadosValidos.Contains(request.Estado))
@@ -171,14 +171,7 @@ namespace MiniApi.Services
             order.Estado = request.Estado;
             await _orderRepository.UpdateAsync(order);
 
-            return new OrderResponse(
-                order.Id,
-                order.UsuarioId,
-                order.Items.Select(i => new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario)).ToList(),
-                order.Total,
-                order.Estado,
-                order.FechaCreacion
-            );
+            return new UpdateOrderStatusResponse(order.Id, order.Estado, DateTime.UtcNow);
         }
     }
 }

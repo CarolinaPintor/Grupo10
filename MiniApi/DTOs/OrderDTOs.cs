@@ -28,6 +28,13 @@ public record UpdateOrderStatusRequest(
     string Estado
 );
 
+// Respuesta de PUT /api/orders/{id}/status (200 OK): solo id, nuevo estado y fecha del cambio.
+public record UpdateOrderStatusResponse(
+    Guid Id,
+    string Estado,
+    DateTime FechaActualizacion
+);
+
 // Respuesta devuelta tras la creación exitosa de una orden (201 Created).
 public record OrderResponse(
     Guid Id,

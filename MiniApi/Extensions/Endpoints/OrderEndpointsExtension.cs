@@ -72,7 +72,7 @@ public static class OrderEndpointsExtension
         .WithName("UpdateOrderStatus")
         .WithSummary("Actualizar estado de la orden")
         .WithDescription("Modifica el estado de la orden validando existencia (ORD-001) y transiciones válidas (ORD-006).")
-        .Produces<OrderResponse>(StatusCodes.Status200OK)
+        .Produces<UpdateOrderStatusResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status409Conflict)
