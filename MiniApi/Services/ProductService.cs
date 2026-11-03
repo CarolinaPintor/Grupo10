@@ -109,6 +109,11 @@ public class ProductService
             throw new BusinessRuleException(ErrorCodes.PRD_004, "El producto tiene órdenes activas y no puede eliminarse.");
         }
 
+        if (await _orderRepository.HasOrdersByProductAsync(id))
+        {
+            throw new BusinessRuleException(ErrorCodes.PRD_004, "El producto figura en órdenes existentes y no puede eliminarse.");
+        }
+
         await _repository.DeleteAsync(id);
     }
 

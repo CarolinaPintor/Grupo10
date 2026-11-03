@@ -210,5 +210,16 @@ namespace MiniApi.Data
 
             return count > 0;
         }
+
+        // ── HAS ORDERS BY PRODUCT (cualquier estado) ──────────────────────────
+        public async Task<bool> HasOrdersByProductAsync(Guid productId)
+        {
+            using var conn = CreateConnection();
+            var count = await conn.ExecuteScalarAsync<int>(
+                "SELECT COUNT(1) FROM order_items WHERE producto_id = @productId",
+                new { productId = productId.ToString() });
+
+            return count > 0;
+        }
     }
 }
