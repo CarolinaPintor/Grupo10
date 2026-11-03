@@ -18,7 +18,8 @@ public record RegisterUserRequest(
     string Email,
 
     [property: Required(ErrorMessage = "La contraseña es obligatoria.")]
-    [property: MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
+    [property: MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
+    [property: RegularExpression(@"^(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "La contraseña debe tener al menos una mayúscula y un número.")]
     string Password
 );
 
