@@ -109,6 +109,10 @@ public class NotificationService
         {
             errores.Add("El campo 'mensaje' es obligatorio.");
         }
+        else if (request.Mensaje.Length > 500)
+        {
+            errores.Add("El campo 'mensaje' no puede superar los 500 caracteres.");
+        }
 
         if (string.IsNullOrWhiteSpace(request.Tipo))
         {

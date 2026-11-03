@@ -76,6 +76,15 @@ namespace MiniApi.Services
                 throw new ValidationException(ErrorCodes.ORD_002, errores);
             }
 
+            // ORD-002: Validator no revisa los ítems anidados, así que valido cada cantidad acá
+            foreach (CreateOrderItemRequest item in request.Items)
+            {
+                if (item.Cantidad < 1)
+                {
+                    throw new ValidationException(ErrorCodes.ORD_002, new[] { "La cantidad de cada ítem debe ser al menos 1." });
+                }
+            }
+
             // ORD-003: Validar que el usuario exista y esté activo (Catálogo: "Usuario no encontrado al crear la orden.")
             User? user = await _userRepository.GetByIdAsync(request.UsuarioId);
             if (user == null || !user.Activo)

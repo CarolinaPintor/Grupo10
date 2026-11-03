@@ -18,6 +18,9 @@ public class UserService
 
     public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest request)
     {
+        // Normalizo el email para que "A@x.com" y "a@x.com" sean el mismo usuario
+        request = request with { Email = request.Email?.Trim().ToLowerInvariant() ?? string.Empty };
+
         // Validar que el email tenga un formato básico correcto
         if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains("@"))
         {
@@ -75,6 +78,15 @@ public class UserService
     }
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
+        // Normalizo el email igual que en el registro
+        request = request with { Email = request.Email?.Trim().ToLowerInvariant() ?? string.Empty };
+
+        // USR-002: email y contraseña son obligatorios
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, new List<string> { "El email y la contraseña son obligatorios." });
+        }
+
         // 1. Buscar al usuario en la base de datos
         User? usuario = await _userRepository.GetByEmailAsync(request.Email);
 

@@ -34,6 +34,7 @@ namespace MiniApi.Extensions
 
             services.AddExceptionHandler<UnauthorizedExceptionHandler>();
             services.AddExceptionHandler<ForbiddenExceptionHandler>();
+            services.AddExceptionHandler<BadRequestExceptionHandler>();
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();

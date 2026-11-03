@@ -5,26 +5,26 @@ namespace MiniApi.DTOs;
 // Request para la creación de una nueva orden (POST /api/orders).
 // Contiene el ID del usuario que realiza la compra y la lista de ítems.
 public record CreateOrderRequest(
-    [Required(ErrorMessage = "El ID del usuario es obligatorio.")]
+    [property: Required(ErrorMessage = "El ID del usuario es obligatorio.")]
     Guid UsuarioId,
 
-    [Required(ErrorMessage = "La lista de ítems es obligatoria.")]
-    [MinLength(1, ErrorMessage = "La orden debe contener al menos un ítem.")]
+    [property: Required(ErrorMessage = "La lista de ítems es obligatoria.")]
+    [property: MinLength(1, ErrorMessage = "La orden debe contener al menos un ítem.")]
     List<CreateOrderItemRequest> Items
 );
 
 // Representa un ítem individual dentro de la solicitud de la orden.
 public record CreateOrderItemRequest(
-    [Required(ErrorMessage = "El ID del producto es obligatorio.")]
+    [property: Required(ErrorMessage = "El ID del producto es obligatorio.")]
     Guid ProductoId,
 
-    [Required(ErrorMessage = "La cantidad es obligatoria.")]
-    [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser al menos 1.")]
+    [property: Required(ErrorMessage = "La cantidad es obligatoria.")]
+    [property: Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser al menos 1.")]
     int Cantidad
 );
 // Request para actualizar el estado de una orden (PUT /api/orders/{id}/status)
 public record UpdateOrderStatusRequest(
-    [Required(ErrorMessage = "El estado es obligatorio.")]
+    [property: Required(ErrorMessage = "El estado es obligatorio.")]
     string Estado
 );
 
