@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using MiniApi.Models;
@@ -151,8 +151,8 @@ namespace MiniApi.Data
                 {
                     id = order.Id.ToString(),
                     usuarioId = order.UsuarioId.ToString(),
-                    order.Total,
-                    order.Estado,
+                    total = order.Total,
+                    estado = order.Estado,
                     fecha = order.FechaCreacion.ToString("o")
                 }, transaction);
 
@@ -166,8 +166,8 @@ namespace MiniApi.Data
                         itemId = Guid.NewGuid().ToString(),
                         orderId = order.Id.ToString(),
                         productoId = item.ProductoId.ToString(),
-                        item.Cantidad,
-                        item.PrecioUnitario
+                        cantidad = item.Cantidad,
+                        precioUnitario = item.PrecioUnitario
                     }, transaction);
                 }
 

@@ -14,6 +14,9 @@ namespace MiniApi.Services
         private readonly ProductRepository _productRepository;
         private readonly UserRepository _userRepository;
 
+        // Estados permitidos para una orden
+        private static readonly string[] EstadosValidos = { "Pendiente", "Confirmada", "Enviada", "Entregada", "Cancelada" };
+
         public OrderService(
             OrderRepository orderRepository,
             ProductRepository productRepository,
@@ -129,6 +132,15 @@ namespace MiniApi.Services
 
         public async Task<OrderResponse> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
         {
+            // ORD-002: el estado debe ser uno de los permitidos
+            if (!EstadosValidos.Contains(request.Estado))
+            {
+                throw new ValidationException(ErrorCodes.ORD_002, new[]
+                {
+                    $"El estado '{request.Estado}' no es válido. Valores permitidos: {string.Join(", ", EstadosValidos)}."
+                });
+            }
+
             var order = await _orderRepository.GetByIdAsync(id);
             if (order == null)
             {
