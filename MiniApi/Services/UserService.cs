@@ -44,7 +44,7 @@ public class UserService
         User? usuarioExistente = await _userRepository.GetByEmailAsync(request.Email);
         if (usuarioExistente != null)
         {
-            throw new BusinessRuleException(ErrorCodes.USR_001, "El email ya está registrado.");
+            throw new BusinessRuleException(ErrorCodes.USR_001, $"El email '{request.Email}' ya está registrado.");
         }
 
         // Hashear la contraseña 
