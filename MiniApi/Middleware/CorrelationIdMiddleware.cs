@@ -14,20 +14,24 @@ namespace MiniApi.Middleware
 
         public CorrelationIdMiddleware(RequestDelegate next) => _next = next;
 
+        // Se ejecuta justo antes de enviar la respuesta y le agrega el header
+        private static Task AgregarHeaderCorrelationId(object estado)
+        {
+            var context = (HttpContext)estado;
+            context.Response.Headers[HeaderName] = context.Items[ItemKey]?.ToString();
+            return Task.CompletedTask;
+        }
+
         public async Task InvokeAsync(HttpContext context)
         {
-            var correlationId = context.Request.Headers[HeaderName].FirstOrDefault();
+            var correlationId = context.Request.Headers[HeaderName].ToString();
 
             // Si no viene (o es demasiado largo) se genera uno nuevo
             if (string.IsNullOrWhiteSpace(correlationId) || correlationId.Length > MaxLength)
                 correlationId = Guid.NewGuid().ToString();
 
             context.Items[ItemKey] = correlationId;
-            context.Response.OnStarting(() =>
-            {
-                context.Response.Headers[HeaderName] = correlationId;
-                return Task.CompletedTask;
-            });
+            context.Response.OnStarting(AgregarHeaderCorrelationId, context);
 
             // Todos los logs del request llevan el CorrelationId
             using (LogContext.PushProperty("CorrelationId", correlationId))
