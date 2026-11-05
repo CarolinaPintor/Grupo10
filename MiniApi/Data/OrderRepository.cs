@@ -34,7 +34,13 @@ namespace MiniApi.Data
                     FechaCreacion = DateTime.Parse(FechaCreacion, null, DateTimeStyles.RoundtripKind)
                 };
 
-                order.Items = items.ToArray();
+                var listaItems = new List<OrderItem>();
+                foreach (OrderItem item in items)
+                {
+                    listaItems.Add(item);
+                }
+
+                order.Items = listaItems.ToArray();
                 return order;
             }
         }
@@ -69,7 +75,12 @@ namespace MiniApi.Data
                 WHERE order_id = @orderId
             """, new { orderId = id.ToString() });
 
-            var items = itemRows.Select(i => i.ToModel()).ToList();
+            var items = new List<OrderItem>();
+            foreach (var fila in itemRows)
+            {
+                items.Add(fila.ToModel());
+            }
+
             return orderRow.ToModel(items);
         }
 
@@ -78,12 +89,12 @@ namespace MiniApi.Data
         {
             using var conn = CreateConnection();
 
-            var orderRows = (await conn.QueryAsync<OrderRow>("""
+            var orderRows = await conn.QueryAsync<OrderRow>("""
                 SELECT id AS Id, usuario_id AS UsuarioId, total AS Total, 
                        estado AS Estado, fecha_creacion AS FechaCreacion 
                 FROM orders 
                 WHERE usuario_id = @usuarioId
-            """, new { usuarioId = usuarioId.ToString() })).ToList();
+            """, new { usuarioId = usuarioId.ToString() });
 
             var orders = new List<Order>();
 
@@ -95,7 +106,12 @@ namespace MiniApi.Data
                     WHERE order_id = @orderId
                 """, new { orderId = orderRow.Id });
 
-                var items = itemRows.Select(i => i.ToModel()).ToList();
+                var items = new List<OrderItem>();
+                foreach (var fila in itemRows)
+                {
+                    items.Add(fila.ToModel());
+                }
+
                 orders.Add(orderRow.ToModel(items));
             }
 
@@ -112,11 +128,11 @@ namespace MiniApi.Data
 
             using var conn = CreateConnection();
 
-            var orderRows = (await conn.QueryAsync<OrderRow>("""
+            var orderRows = await conn.QueryAsync<OrderRow>("""
                 SELECT id AS Id, usuario_id AS UsuarioId, total AS Total, 
                        estado AS Estado, fecha_creacion AS FechaCreacion 
                 FROM orders
-            """)).ToList();
+            """);
 
             var orders = new List<Order>();
 
@@ -128,7 +144,12 @@ namespace MiniApi.Data
                     WHERE order_id = @orderId
                 """, new { orderId = orderRow.Id });
 
-                var items = itemRows.Select(i => i.ToModel()).ToList();
+                var items = new List<OrderItem>();
+                foreach (var fila in itemRows)
+                {
+                    items.Add(fila.ToModel());
+                }
+
                 orders.Add(orderRow.ToModel(items));
             }
 
