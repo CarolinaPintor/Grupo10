@@ -20,8 +20,18 @@ public class Order
     {
         Id = Guid.NewGuid();
         UsuarioId = usuarioId;
-        Items = items.ToArray();
-        Total = Items.Sum(item => item.Cantidad * item.PrecioUnitario);
+
+        // Paso los ítems a un arreglo y voy sumando el total con un acumulador
+        var listaItems = new List<OrderItem>();
+        decimal total = 0;
+        foreach (OrderItem item in items)
+        {
+            listaItems.Add(item);
+            total += item.Cantidad * item.PrecioUnitario;
+        }
+
+        Items = listaItems.ToArray();
+        Total = total;
         Estado = "Pendiente";
         FechaCreacion = DateTime.UtcNow;
     }

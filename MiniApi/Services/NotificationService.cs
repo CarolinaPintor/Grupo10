@@ -68,7 +68,11 @@ public class NotificationService
         }
 
         // 2. Buscar las notificaciones registradas para ese usuario
-        var notificaciones = (await _notificationRepository.GetByUserIdAsync(userId)).ToList();
+        var notificaciones = new List<Notification>();
+        foreach (var n in await _notificationRepository.GetByUserIdAsync(userId))
+        {
+            notificaciones.Add(n);
+        }
 
         // 3. Si no tiene notificaciones registradas, devolver error NTF-003 (HTTP 404 Not Found)
         if (notificaciones.Count == 0)
@@ -79,16 +83,35 @@ public class NotificationService
         }
 
         // 4. Mapear las entidades a DTOs de respuesta
-        return notificaciones.Select(n => new NotificationResponse
+        var respuestas = new List<NotificationResponse>();
+        foreach (var n in notificaciones)
         {
-            Id = n.Id,
-            UsuarioId = n.UsuarioId,
-            Mensaje = n.Mensaje,
-            Tipo = n.Tipo,
-            Estado = n.Estado,
-            FechaEnvio = n.FechaEnvio
-        });
+            respuestas.Add(new NotificationResponse
+            {
+                Id = n.Id,
+                UsuarioId = n.UsuarioId,
+                Mensaje = n.Mensaje,
+                Tipo = n.Tipo,
+                Estado = n.Estado,
+                FechaEnvio = n.FechaEnvio
+            });
+        }
+
+        return respuestas;
     }
+    private static bool EsTipoPermitido(string tipo)
+    {
+        foreach (string permitido in TiposPermitidos)
+        {
+            if (permitido == tipo)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static void ValidarRequest(SendNotificationRequest? request)
     {
         if (request is null)
@@ -118,7 +141,7 @@ public class NotificationService
         {
             errores.Add("El campo 'tipo' es obligatorio.");
         }
-        else if (!TiposPermitidos.Contains(request.Tipo.Trim(), StringComparer.Ordinal))
+        else if (!EsTipoPermitido(request.Tipo.Trim()))
         {
             errores.Add("El tipo de notificación debe ser 'Email', 'Push' o 'SMS'.");
         }

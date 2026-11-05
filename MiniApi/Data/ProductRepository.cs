@@ -63,7 +63,14 @@ namespace MiniApi.Data
             }
 
             var filas = await conn.QueryAsync<ProductRow>(sql, parameters);
-            return filas.Select(f => f.ToModel());
+
+            var productos = new List<Product>();
+            foreach (var fila in filas)
+            {
+                productos.Add(fila.ToModel());
+            }
+
+            return productos;
         }
 
         // ── GET BY ID ─────────────────────────────────────────────────────────

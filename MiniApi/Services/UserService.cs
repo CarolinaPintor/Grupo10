@@ -36,7 +36,12 @@ public class UserService
 
         if (!esValido)
         {
-            IEnumerable<string> errores = resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
+            var errores = new List<string>();
+            foreach (var r in resultadosValidacion)
+            {
+                errores.Add(r.ErrorMessage ?? "Dato inválido");
+            }
+
             throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, errores);
         }
 

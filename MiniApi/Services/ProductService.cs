@@ -23,7 +23,14 @@ public class ProductService
     public async Task<IEnumerable<ProductResponse>> GetAllAsync(string? categoria, string? nombre)
     {
         var products = await _repository.GetAllAsync(categoria, nombre);
-        return products.Select(MapToResponse);
+
+        var respuestas = new List<ProductResponse>();
+        foreach (var product in products)
+        {
+            respuestas.Add(MapToResponse(product));
+        }
+
+        return respuestas;
     }
 
     public async Task<ProductResponse> GetByIdAsync(Guid id)
@@ -125,7 +132,12 @@ public class ProductService
 
         if (!esValido)
         {
-            var errores = resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
+            var errores = new List<string>();
+            foreach (var r in resultadosValidacion)
+            {
+                errores.Add(r.ErrorMessage ?? "Dato inválido");
+            }
+
             throw new ValidationException(ErrorCodes.PRD_002, errores);
         }
     }

@@ -30,14 +30,14 @@ namespace MiniApi.Services
         public async Task<IEnumerable<OrderResponse>> GetAllAsync(Guid? usuarioId)
         {
             var orders = await _orderRepository.GetAllAsync(usuarioId);
-            return orders.Select(o => new OrderResponse(
-                o.Id,
-                o.UsuarioId,
-                o.Items.Select(i => new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario)).ToList(),
-                o.Total,
-                o.Estado,
-                o.FechaCreacion
-            ));
+
+            var respuestas = new List<OrderResponse>();
+            foreach (var o in orders)
+            {
+                respuestas.Add(MapToResponse(o));
+            }
+
+            return respuestas;
         }
 
         public async Task<OrderResponse> GetByIdAsync(Guid id)
@@ -48,10 +48,22 @@ namespace MiniApi.Services
                 throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada."); // ORD-001[cite: 12]
             }
 
+            return MapToResponse(order);
+        }
+
+        // Convierte una orden del modelo en el DTO de respuesta (con foreach en vez de LINQ)
+        private static OrderResponse MapToResponse(Order order)
+        {
+            var items = new List<OrderItemResponse>();
+            foreach (var i in order.Items)
+            {
+                items.Add(new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario));
+            }
+
             return new OrderResponse(
                 order.Id,
                 order.UsuarioId,
-                order.Items.Select(i => new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario)).ToList(),
+                items,
                 order.Total,
                 order.Estado,
                 order.FechaCreacion
@@ -65,13 +77,27 @@ namespace MiniApi.Services
             ValidationContext contextoValidacion = new ValidationContext(request);
             bool esValido = Validator.TryValidateObject(request, contextoValidacion, resultadosValidacion, true);
 
-            if (!esValido || request.UsuarioId == Guid.Empty || request.Items == null || !request.Items.Any())
+            bool sinItems = request.Items == null || request.Items.Count == 0;
+
+            if (!esValido || request.UsuarioId == Guid.Empty || sinItems)
             {
-                IEnumerable<string> errores = request.Items == null || !request.Items.Any()
-                    ? new[] { "Los datos de la orden son inválidos." }
-                    : request.UsuarioId == Guid.Empty
-                        ? new[] { "El ID del usuario es obligatorio." }
-                        : resultadosValidacion.Select(r => r.ErrorMessage ?? "Dato inválido");
+                var errores = new List<string>();
+
+                if (sinItems)
+                {
+                    errores.Add("Los datos de la orden son inválidos.");
+                }
+                else if (request.UsuarioId == Guid.Empty)
+                {
+                    errores.Add("El ID del usuario es obligatorio.");
+                }
+                else
+                {
+                    foreach (var r in resultadosValidacion)
+                    {
+                        errores.Add(r.ErrorMessage ?? "Dato inválido");
+                    }
+                }
 
                 throw new ValidationException(ErrorCodes.ORD_002, errores);
             }
@@ -93,7 +119,7 @@ namespace MiniApi.Services
             }
 
             // ORD-002 / ORD-004: Validar que la orden contenga ítems
-            if (request.Items == null || !request.Items.Any())
+            if (request.Items == null || request.Items.Count == 0)
             {
                 throw new BusinessRuleException(ErrorCodes.ORD_002, "La orden debe contener al menos un ítem."); // ORD-002[cite: 12]
             }
@@ -131,20 +157,22 @@ namespace MiniApi.Services
             await _orderRepository.AddAsync(nuevaOrden);
 
             // Retornar el DTO de respuesta seguro
-            return new OrderResponse(
-                nuevaOrden.Id,
-                nuevaOrden.UsuarioId,
-                nuevaOrden.Items.Select(i => new OrderItemResponse(i.ProductoId, i.Cantidad, i.PrecioUnitario)).ToList(),
-                nuevaOrden.Total,
-                nuevaOrden.Estado,
-                nuevaOrden.FechaCreacion
-            );
+            return MapToResponse(nuevaOrden);
         }
 
         public async Task<UpdateOrderStatusResponse> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
         {
             // ORD-002: el estado debe ser uno de los permitidos
-            if (!EstadosValidos.Contains(request.Estado))
+            bool estadoValido = false;
+            foreach (string estado in EstadosValidos)
+            {
+                if (estado == request.Estado)
+                {
+                    estadoValido = true;
+                }
+            }
+
+            if (!estadoValido)
             {
                 throw new ValidationException(ErrorCodes.ORD_002, new[]
                 {
