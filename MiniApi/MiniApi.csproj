@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="docs\swagger\" />
     <Folder Include="workflows\" />
   </ItemGroup>
 
