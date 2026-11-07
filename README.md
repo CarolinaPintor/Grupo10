@@ -302,3 +302,93 @@ NTF-004	500	Error interno al procesar notificaciones.
 Manejo de errores de formato
 Las solicitudes con datos inválidos o JSON malformado se gestionan mediante las validaciones correspondientes y el manejador `BadRequestExceptionHandler`, cuando corresponda al código de error del dominio.
 Los errores inesperados son tratados por el manejador global, que evita exponer detalles internos de la aplicación en las respuestas al cliente.
+
+## **7\. Reglas de negocio y seguridad**
+
+### **Usuarios y contraseñas**
+
+* Las contraseñas no se almacenan en texto plano.  
+* Se utiliza PBKDF2 con SHA-256 y un salt criptográfico aleatorio para generar los hashes.  
+* La comparación de hashes utiliza `CryptographicOperations.FixedTimeEquals`.  
+* Los DTOs de respuesta no incluyen `PasswordHash`.  
+* Luego de tres intentos fallidos consecutivos, la cuenta se bloquea.  
+* Si el inicio de sesión es correcto, el contador de intentos fallidos vuelve a cero.  
+* Se diferencian las credenciales incorrectas, las cuentas bloqueadas automáticamente y las cuentas suspendidas.
+
+### **Productos**
+
+* El nombre de un producto debe ser único dentro de su categoría.  
+* El precio debe ser mayor que cero.  
+* El stock no puede ser negativo.  
+* No se permite eliminar un producto que esté asociado a órdenes pendientes o confirmadas.
+
+### **Órdenes**
+
+* Para crear una orden se valida que el usuario exista y esté activo.  
+* Se comprueba la existencia de cada producto y la disponibilidad de stock.  
+* El precio unitario se obtiene del producto registrado en el sistema, no del valor enviado por el cliente.  
+* El total se calcula a partir de las cantidades y los precios unitarios.  
+* La creación de la orden y sus ítems se realiza dentro de una transacción para mantener la integridad de los datos.  
+* Las transiciones de estado deben respetar las reglas de negocio definidas.
+
+### **Carrito**
+
+* Un usuario puede agregar productos a su carrito.  
+* Si agrega un producto que ya existe, se acumula la cantidad.  
+* Se valida que el producto exista y que haya stock suficiente.  
+* Se permite actualizar cantidades y eliminar productos del carrito.
+
+### **Notificaciones**
+
+* Solo se aceptan los tipos `Email`, `Push` y `SMS`.  
+* Se verifica que el usuario destinatario exista.  
+* Se valida que el mensaje y los datos recibidos sean correctos.  
+* Se registra el estado y la fecha de envío de la notificación.  
+* Se puede consultar el historial de notificaciones de un usuario.
+
+## **8\. Observabilidad**
+
+La aplicación incorpora mecanismos de trazabilidad, logging y monitoreo para facilitar el seguimiento de las solicitudes y detectar problemas durante la ejecución.
+
+### **Correlation ID**
+
+El middleware `CorrelationIdMiddleware` permite asociar un identificador único a cada solicitud HTTP.
+
+* Si la solicitud incluye el header `X-Correlation-Id`, se utiliza ese valor.  
+* Si no lo incluye, se genera un nuevo identificador.  
+* El valor se devuelve en el header de respuesta.  
+* También se incorpora en las respuestas de error y en los registros de Serilog.
+
+Esto permite relacionar una solicitud con los eventos registrados durante su procesamiento.
+
+### **Logging con Serilog**
+
+Se utiliza Serilog para registrar eventos de la aplicación de manera estructurada.
+
+Los registros contemplan información como:
+
+* Fecha y hora.  
+* Nivel del evento.  
+* Servicio.  
+* Endpoint.  
+* Correlation ID.  
+* Código de error, cuando corresponde.
+
+Se utilizan distintos destinos de logging:
+
+* **Consola:** muestra los eventos durante la ejecución.  
+* **Auditoría:** registra información de las solicitudes HTTP.  
+* **Archivo JSON:** almacena eventos estructurados para facilitar su análisis.
+
+Los registros de auditoría y los archivos JSON se generan en el directorio `logs/`, según la configuración de Serilog.
+
+### **Health Checks**
+
+La aplicación dispone de endpoints para comprobar su estado:
+
+| Endpoint | Finalidad |
+| ----- | ----- |
+| `/health` | Consulta general del estado de la aplicación. |
+| `/health/live` | Comprueba que el proceso se encuentre activo. |
+| `/health/ready` | Verifica la disponibilidad de SQLite. |
+| `/health-ui` | Presenta el estado mediante una interfaz visual. |
