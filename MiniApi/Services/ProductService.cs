@@ -110,15 +110,10 @@ public class ProductService
             throw new NotFoundException(ErrorCodes.PRD_001, $"No se encontró el producto con ID '{id}'.");
         }
 
-        // PRD-004: no se puede eliminar un producto con órdenes Pendiente o Confirmada
+        // PRD-004: Solo se prohíbe eliminar si el producto tiene órdenes Pendiente o Confirmada
         if (await _orderRepository.HasActiveOrdersByProductAsync(id))
         {
             throw new BusinessRuleException(ErrorCodes.PRD_004, "El producto tiene órdenes activas y no puede eliminarse.");
-        }
-
-        if (await _orderRepository.HasOrdersByProductAsync(id))
-        {
-            throw new BusinessRuleException(ErrorCodes.PRD_004, "El producto figura en órdenes existentes y no puede eliminarse.");
         }
 
         await _repository.DeleteAsync(id);
