@@ -45,7 +45,7 @@ namespace MiniApi.Services
             var order = await _orderRepository.GetByIdAsync(id);
             if (order == null)
             {
-                throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada."); // ORD-001[cite: 12]
+                throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada.");
             }
 
             return MapToResponse(order);
@@ -103,7 +103,7 @@ namespace MiniApi.Services
             }
 
             // ORD-002: Validator no revisa los ítems anidados, así que valido cada cantidad acá
-            foreach (CreateOrderItemRequest item in request.Items)
+            foreach (CreateOrderItemRequest item in request.Items!)
             {
                 if (item.Cantidad < 1)
                 {
@@ -111,38 +111,55 @@ namespace MiniApi.Services
                 }
             }
 
-            // ORD-003: Validar que el usuario exista y esté activo (Catálogo: "Usuario no encontrado al crear la orden.")
+            // ORD-003: Validar que el usuario exista y esté activo
             User? user = await _userRepository.GetByIdAsync(request.UsuarioId);
             if (user == null || !user.Activo)
             {
-                throw new NotFoundException(ErrorCodes.ORD_003, $"El usuario con ID '{request.UsuarioId}' no existe o no está activo."); // ORD-003[cite: 12]
+                throw new NotFoundException(ErrorCodes.ORD_003, $"El usuario con ID '{request.UsuarioId}' no existe o no está activo.");
             }
 
-            // ORD-002 / ORD-004: Validar que la orden contenga ítems
-            if (request.Items == null || request.Items.Count == 0)
+            var itemsConsolidados = new List<CreateOrderItemRequest>();
+
+            foreach (var itemRecibido in request.Items)
             {
-                throw new BusinessRuleException(ErrorCodes.ORD_002, "La orden debe contener al menos un ítem."); // ORD-002[cite: 12]
+                bool yaExiste = false;
+
+                for (int i = 0; i < itemsConsolidados.Count; i++)
+                {
+                    if (itemsConsolidados[i].ProductoId == itemRecibido.ProductoId)
+                    {
+                        int nuevaCantidad = itemsConsolidados[i].Cantidad + itemRecibido.Cantidad;
+                        itemsConsolidados[i] = new CreateOrderItemRequest(itemRecibido.ProductoId, nuevaCantidad);
+                        yaExiste = true;
+                        break;
+                    }
+                }
+
+                if (!yaExiste)
+                {
+                    itemsConsolidados.Add(new CreateOrderItemRequest(itemRecibido.ProductoId, itemRecibido.Cantidad));
+                }
             }
 
             var orderItems = new List<OrderItem>();
 
-            // Recorrer con foreach y acumulador, validando productos y stock
-            foreach (var itemDto in request.Items)
+            // Recorrer la lista consolidada validando productos y stock total por producto
+            foreach (var itemDto in itemsConsolidados)
             {
                 var product = await _productRepository.GetByIdAsync(itemDto.ProductoId);
 
-                // ORD-004: Producto no encontrado al crear la orden[cite: 12]
+                // ORD-004: Producto no encontrado al crear la orden
                 if (product == null)
                 {
-                    throw new NotFoundException(ErrorCodes.ORD_004, $"No se encontró el producto con ID '{itemDto.ProductoId}'."); // ORD-004[cite: 12]
+                    throw new NotFoundException(ErrorCodes.ORD_004, $"No se encontró el producto con ID '{itemDto.ProductoId}'.");
                 }
 
-                // ORD-005: Stock insuficiente con Status422UnprocessableEntity[cite: 13]
+                // ORD-005: Stock insuficiente con Status422UnprocessableEntity
                 if (product.Stock < itemDto.Cantidad)
                 {
                     throw new BusinessRuleException(
                         ErrorCodes.ORD_005,
-                        $"Stock insuficiente para el producto '{product.Nombre}'. Stock disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.", // ORD-005[cite: 13]
+                        $"Stock insuficiente para el producto '{product.Nombre}'. Stock disponible: {product.Stock}, solicitado: {itemDto.Cantidad}.",
                         StatusCodes.Status422UnprocessableEntity
                     );
                 }
@@ -150,10 +167,10 @@ namespace MiniApi.Services
                 orderItems.Add(new OrderItem(product.Id, itemDto.Cantidad, product.Precio));
             }
 
-            // Utilizar el constructor de Order para inicializar la orden, convertir los ítems y calcular el total automáticamente
+            // Utilizar el constructor de Order para inicializar la orden y calcular el total automáticamente
             Order nuevaOrden = new Order(request.UsuarioId, orderItems);
 
-            // Guardar la orden en la base de datos
+            // Guardar la orden y descontar el stock en la base de datos
             await _orderRepository.AddAsync(nuevaOrden);
 
             // Retornar el DTO de respuesta seguro
@@ -183,15 +200,15 @@ namespace MiniApi.Services
             var order = await _orderRepository.GetByIdAsync(id);
             if (order == null)
             {
-                throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada."); // ORD-001[cite: 12]
+                throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada.");
             }
 
-            // ORD-006: Validar transición de estados (Ej: Entregada no puede volver a Pendiente)[cite: 14]
+            // ORD-006: Validar transición de estados (Ej: Entregada no puede volver a Pendiente)
             if (order.Estado == "Entregada" && request.Estado == "Pendiente")
             {
                 throw new BusinessRuleException(
                     ErrorCodes.ORD_006,
-                    "Una orden en estado 'Entregada' no puede volver a 'Pendiente'.", // ORD-006[cite: 14]
+                    "Una orden en estado 'Entregada' no puede volver a 'Pendiente'.",
                     StatusCodes.Status409Conflict
                 );
             }

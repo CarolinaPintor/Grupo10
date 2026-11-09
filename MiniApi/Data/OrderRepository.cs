@@ -9,10 +9,15 @@ namespace MiniApi.Data
     {
         private readonly IConfiguration _config;
 
-        public OrderRepository(IConfiguration config) => _config = config;
+        public OrderRepository(IConfiguration config)
+        {
+            _config = config;
+        }
 
-        private SqliteConnection CreateConnection() =>
-            new(_config.GetConnectionString("DefaultConnection") ?? "Data Source=app.db");
+        private SqliteConnection CreateConnection()
+        {
+            return new SqliteConnection(_config.GetConnectionString("DefaultConnection") ?? "Data Source=app.db");
+        }
 
         // Fila intermedia para mapear la orden correctamente
         private class OrderRow
@@ -52,7 +57,10 @@ namespace MiniApi.Data
             public int Cantidad { get; set; }
             public decimal PrecioUnitario { get; set; }
 
-            public OrderItem ToModel() => new(Guid.Parse(ProductoId), Cantidad, PrecioUnitario);
+            public OrderItem ToModel()
+            {
+                return new OrderItem(Guid.Parse(ProductoId), Cantidad, PrecioUnitario);
+            }
         }
 
         // ── GET BY ID ─────────────────────────────────────────────────────────
@@ -156,7 +164,7 @@ namespace MiniApi.Data
             return orders;
         }
 
-        // ── ADD ───────────────────────────────────────────────────────────────
+        // ── ADD (Inserta orden, ítems y descuenta stock en transacción) ───────
         public async Task AddAsync(Order order)
         {
             using var conn = CreateConnection();
@@ -189,6 +197,17 @@ namespace MiniApi.Data
                         productoId = item.ProductoId.ToString(),
                         cantidad = item.Cantidad,
                         precioUnitario = item.PrecioUnitario
+                    }, transaction);
+
+                    // Descontar el stock del producto comprado
+                    await conn.ExecuteAsync("""
+                        UPDATE products 
+                        SET stock = stock - @cantidad 
+                        WHERE id = @productoId
+                    """, new
+                    {
+                        cantidad = item.Cantidad,
+                        productoId = item.ProductoId.ToString()
                     }, transaction);
                 }
 
