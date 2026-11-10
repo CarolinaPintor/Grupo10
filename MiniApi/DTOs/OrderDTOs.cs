@@ -9,7 +9,7 @@ public record CreateOrderRequest(
     Guid UsuarioId,
 
     [property: Required(ErrorMessage = "La lista de ítems es obligatoria.")]
-    [property: MinLength(1, ErrorMessage = "La orden debe contener al menos un ítem.")]
+    [property: MinLength(1, ErrorMessage = "Los datos de la orden son inválidos.")]
     List<CreateOrderItemRequest> Items
 );
 
