@@ -270,7 +270,7 @@ Las respuestas siguen el formato Problem Details (`application/problem+json`) e 
 
 ```
 {
-  "type": "about:blank",
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
   "title": "Not Found",
   "status": 404,
   "detail": "Descripción general del error.",
