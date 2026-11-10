@@ -93,8 +93,6 @@ La estructura principal del proyecto es la siguiente:
 Grupo10/
 ├── MiniApi.slnx
 ├── README.md
-├── docs/
-│   └── swagger/
 ├── .github/
 │   └── workflows/
 │       └── dotnet-build.yml
@@ -102,6 +100,8 @@ Grupo10/
     ├── Program.cs
     ├── MiniApi.csproj
     ├── appsettings.json
+    ├── docs/
+    │   └── swagger/
     ├── Common/
     ├── Data/
     ├── Models/
@@ -410,7 +410,7 @@ La aplicación dispone de endpoints para comprobar su estado:
 | `/health-ui` | Presenta el estado mediante una interfaz visual. |
 ## **9\. Evidencias de Swagger**
 
-En el directorio `docs/swagger/` se incluyen capturas de la documentación interactiva y de distintos escenarios de respuesta de la API.
+En el directorio `MiniApi/docs/swagger/` se incluyen capturas de la documentación interactiva y de distintos escenarios de respuesta de la API.
 
 | Archivo | Escenario | Código |
 | ----- | ----- | ----- |
