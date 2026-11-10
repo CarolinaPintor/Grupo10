@@ -93,8 +93,6 @@ La estructura principal del proyecto es la siguiente:
 Grupo10/
 ├── MiniApi.slnx
 ├── README.md
-├── docs/
-│   └── swagger/
 ├── .github/
 │   └── workflows/
 │       └── dotnet-build.yml
@@ -102,6 +100,9 @@ Grupo10/
     ├── Program.cs
     ├── MiniApi.csproj
     ├── appsettings.json
+    ├── MiniApi.http
+    ├── docs/
+    │   └── swagger/
     ├── Common/
     ├── Data/
     ├── Models/
@@ -269,7 +270,7 @@ Las respuestas siguen el formato Problem Details (`application/problem+json`) e 
 
 ```
 {
-  "type": "about:blank",
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
   "title": "Not Found",
   "status": 404,
   "detail": "Descripción general del error.",
@@ -316,7 +317,7 @@ El contenido de `type`, `title`, `detail` e `instance` puede variar según la ex
 
 ### **Manejo de errores de formato**
 
-Las solicitudes con datos inválidos o JSON malformado se gestionan mediante las validaciones correspondientes y el manejador `BadRequestExceptionHandler`, cuando corresponda al código de error del dominio.
+Las solicitudes con datos inválidos o JSON malformado se gestionan mediante las validaciones correspondientes y el manejador `BadRequestExceptionHandler`, que responde con el código de error del dominio correspondiente (por ejemplo, `PRD-002` para productos) en todos los entornos.
 
 Los errores inesperados son tratados por el manejador global, que evita exponer detalles internos de la aplicación en las respuestas al cliente.
 ## **7\. Reglas de negocio y seguridad**
@@ -410,7 +411,7 @@ La aplicación dispone de endpoints para comprobar su estado:
 | `/health-ui` | Presenta el estado mediante una interfaz visual. |
 ## **9\. Evidencias de Swagger**
 
-En el directorio `docs/swagger/` se incluyen capturas de la documentación interactiva y de distintos escenarios de respuesta de la API.
+En el directorio `MiniApi/docs/swagger/` se incluyen capturas de la documentación interactiva y de distintos escenarios de respuesta de la API.
 
 | Archivo | Escenario | Código |
 | ----- | ----- | ----- |
@@ -426,7 +427,7 @@ En el directorio `docs/swagger/` se incluyen capturas de la documentación inter
 | `10-CRT-003-stock-insuficiente-carrito-422.jpg` | Agregado de un producto sin stock suficiente. | 422 |
 | `11-NTF-001-usuario-no-encontrado-404.jpg` | Envío de una notificación a un usuario inexistente. | 404 |
 
-Estas capturas documentan escenarios seleccionados de la API. Para probar otras operaciones y respuestas se pueden utilizar Swagger UI o el archivo `pruebas.http`.
+Estas capturas documentan escenarios seleccionados de la API. Para probar otras operaciones y respuestas se pueden utilizar Swagger UI o el archivo `MiniApi/MiniApi.http`.
 
 ## **10\. Decisiones de diseño**
 
