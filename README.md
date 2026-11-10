@@ -100,6 +100,7 @@ Grupo10/
     ├── Program.cs
     ├── MiniApi.csproj
     ├── appsettings.json
+    ├── MiniApi.http
     ├── docs/
     │   └── swagger/
     ├── Common/
@@ -426,7 +427,7 @@ En el directorio `MiniApi/docs/swagger/` se incluyen capturas de la documentaci�
 | `10-CRT-003-stock-insuficiente-carrito-422.jpg` | Agregado de un producto sin stock suficiente. | 422 |
 | `11-NTF-001-usuario-no-encontrado-404.jpg` | Envío de una notificación a un usuario inexistente. | 404 |
 
-Estas capturas documentan escenarios seleccionados de la API. Para probar otras operaciones y respuestas se pueden utilizar Swagger UI o el archivo `pruebas.http`.
+Estas capturas documentan escenarios seleccionados de la API. Para probar otras operaciones y respuestas se pueden utilizar Swagger UI o el archivo `MiniApi/MiniApi.http`.
 
 ## **10\. Decisiones de diseño**
 
