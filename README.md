@@ -102,7 +102,6 @@ Grupo10/
     ├── Program.cs
     ├── MiniApi.csproj
     ├── appsettings.json
-    ├── pruebas.http
     ├── Common/
     ├── Data/
     ├── Models/
