@@ -13,8 +13,10 @@ public class NotificationRepository
         _config = config;
     }
 
-    private SqliteConnection CreateConnection() =>
-        new(_config.GetConnectionString("DefaultConnection") ?? "Data Source=app.db");
+    private SqliteConnection CreateConnection()
+    {
+        return new SqliteConnection(_config.GetConnectionString("DefaultConnection") ?? "Data Source=app.db");
+    }
 
     // 1. Obtener todas las notificaciones (ordenadas de la más reciente a la más antigua)
     public async Task<IEnumerable<Notification>> GetAllAsync()
@@ -52,7 +54,8 @@ public class NotificationRepository
             ORDER BY fecha_envio DESC;
             """;
 
-        return await connection.QueryAsync<Notification>(sql, new { UsuarioId = usuarioId });
+        //Se pasa usuarioId.ToString() para que coincida con el TEXT de SQLite
+        return await connection.QueryAsync<Notification>(sql, new { UsuarioId = usuarioId.ToString() });
     }
 
     // 3. Obtener una notificación puntual por su Id
@@ -71,7 +74,8 @@ public class NotificationRepository
             WHERE id = @Id;
             """;
 
-        return await connection.QueryFirstOrDefaultAsync<Notification>(sql, new { Id = id });
+        //Se pasa id.ToString() para que coincida con el TEXT de SQLite
+        return await connection.QueryFirstOrDefaultAsync<Notification>(sql, new { Id = id.ToString() });
     }
 
     // 4. Guardar una nueva notificación en la base de datos
@@ -97,10 +101,11 @@ public class NotificationRepository
             );
             """;
 
+        // Modifico algo: Guardo Id y UsuarioId como string (.ToString()) en SQLite
         await connection.ExecuteAsync(sql, new
         {
-            notification.Id,
-            notification.UsuarioId,
+            Id = notification.Id.ToString(),
+            UsuarioId = notification.UsuarioId.ToString(),
             notification.Mensaje,
             notification.Tipo,
             notification.Estado,
