@@ -51,7 +51,7 @@ namespace MiniApi.Services
             return MapToResponse(order);
         }
 
-        // Convierte una orden del modelo en el DTO de respuesta (con foreach en vez de LINQ)
+        // Convierte una orden del modelo en el DTO de respuesta 
         private static OrderResponse MapToResponse(Order order)
         {
             var items = new List<OrderItemResponse>();
@@ -102,9 +102,15 @@ namespace MiniApi.Services
                 throw new ValidationException(ErrorCodes.ORD_002, errores);
             }
 
-            // ORD-002: Validator no revisa los ítems anidados, así que valido cada cantidad acá
+            // ORD-002: Validator no revisa los ítems anidados, así que valido ProductoId y cantidad acá
             foreach (CreateOrderItemRequest item in request.Items!)
             {
+                // Validar que ProductoId no sea Guid.Empty
+                if (item.ProductoId == Guid.Empty)
+                {
+                    throw new ValidationException(ErrorCodes.ORD_002, new[] { "El ID del producto en cada ítem es obligatorio." });
+                }
+
                 if (item.Cantidad < 1)
                 {
                     throw new ValidationException(ErrorCodes.ORD_002, new[] { "La cantidad de cada ítem debe ser al menos 1." });
@@ -209,6 +215,16 @@ namespace MiniApi.Services
                 throw new BusinessRuleException(
                     ErrorCodes.ORD_006,
                     "Una orden en estado 'Entregada' no puede volver a 'Pendiente'.",
+                    StatusCodes.Status409Conflict
+                );
+            }
+
+            // Impedir que órdenes ya finalizadas (Entregada o Cancelada) cambien a otro estado
+            if (order.Estado == "Entregada" || order.Estado == "Cancelada")
+            {
+                throw new BusinessRuleException(
+                    ErrorCodes.ORD_006,
+                    $"El estado de la orden no puede ser modificado porque ya se encuentra '{order.Estado}'.",
                     StatusCodes.Status409Conflict
                 );
             }
