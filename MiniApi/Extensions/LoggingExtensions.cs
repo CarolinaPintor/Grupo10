@@ -19,7 +19,7 @@ namespace MiniApi.Extensions
 
                 // ALUMNO: LOG DE CONSOLA: libre para usarse como quieran
                 .WriteTo.Logger(lc => lc
-                    .Filter.ByIncludingOnly(le => le.Level >= LogEventLevel.Error)
+                    .Filter.ByIncludingOnly(le => le.Level >= LogEventLevel.Information)
                     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"))
 
                 // ALUMNO: LOG DE CONSOLA: Solo registra cuando se consume un endpoint, es una auditoría limpia. 

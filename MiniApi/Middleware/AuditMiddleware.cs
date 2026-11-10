@@ -20,6 +20,14 @@ namespace MiniApi.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
+            string path = context.Request.Path.Value ?? string.Empty;
+
+            if (!path.Contains("/swagger", StringComparison.OrdinalIgnoreCase) &&
+                !path.Contains("/health", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation("Inicio de request {Method} {Path}", context.Request.Method, path);
+            }
+
             // Si no es una operación de escritura, pasar directo
             if (!AuditMethods.Contains(context.Request.Method))
             {
@@ -47,13 +55,20 @@ namespace MiniApi.Middleware
             await memStream.CopyToAsync(originalResponseBody);
             context.Response.Body = originalResponseBody;
 
+            bool esRutaSensible = path.Contains("/api/users/login", StringComparison.OrdinalIgnoreCase) ||
+                                  path.Contains("/api/users/register", StringComparison.OrdinalIgnoreCase);
+
+            object? requestBodySeguro = esRutaSensible
+                ? "[CONTENIDO SENSIBLE OMITIDO]"
+                : TryParseJson(requestBody);
+
             // ── Escribir entrada de auditoría ──────────────────────────────────
             _logger.LogInformation(
                 "AUDIT {@Method} {@Path} {@StatusCode} {@RequestBody} {@ResponseBody}",
                 context.Request.Method,
-                context.Request.Path.Value,
+                path,
                 context.Response.StatusCode,
-                TryParseJson(requestBody),
+                requestBodySeguro,
                 TryParseJson(responseBody));
         }
 
