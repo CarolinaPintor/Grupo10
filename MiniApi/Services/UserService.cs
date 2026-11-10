@@ -22,14 +22,13 @@ public class UserService
         request = request with { Email = request.Email?.Trim().ToLowerInvariant() ?? string.Empty };
 
         // Validar que el email tenga un formato básico correcto
-        if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains("@"))
+        if (string.IsNullOrWhiteSpace(request.Email) || !request.Email.Contains("@") || !new EmailAddressAttribute().IsValid(request.Email))
         {
-            // Corrección: Usamos una List<string> y la constante ErrorCodes.USR_002
             var errores = new List<string> { "El formato del correo electrónico es inválido." };
             throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, errores);
         }
 
-        //  Validar formato de datos (USR-002)
+        // Validar formato de datos con Data Annotations (USR-002)
         List<ValidationResult> resultadosValidacion = new List<ValidationResult>();
         ValidationContext contextoValidacion = new ValidationContext(request);
         bool esValido = Validator.TryValidateObject(request, contextoValidacion, resultadosValidacion, true);
@@ -81,6 +80,7 @@ public class UserService
             nuevoUsuario.Activo
         );
     }
+
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
         // Normalizo el email igual que en el registro
@@ -92,10 +92,32 @@ public class UserService
             throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, new List<string> { "El email y la contraseña son obligatorios." });
         }
 
+        // USR-002: Validar formato del email
+        if (!request.Email.Contains("@") || !new EmailAddressAttribute().IsValid(request.Email))
+        {
+            throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, new List<string> { "El formato del correo electrónico es inválido." });
+        }
+
+        // Validar anotaciones del DTO si las hubiera
+        List<ValidationResult> resultadosValidacion = new List<ValidationResult>();
+        ValidationContext contextoValidacion = new ValidationContext(request);
+        bool esValido = Validator.TryValidateObject(request, contextoValidacion, resultadosValidacion, true);
+
+        if (!esValido)
+        {
+            var errores = new List<string>();
+            foreach (var r in resultadosValidacion)
+            {
+                errores.Add(r.ErrorMessage ?? "Dato inválido");
+            }
+
+            throw new MiniApi.Exceptions.ValidationException(ErrorCodes.USR_002, errores);
+        }
+
         // 1. Buscar al usuario en la base de datos
         User? usuario = await _userRepository.GetByEmailAsync(request.Email);
 
-        // USR-003: Si el email no existe, devolvemos error genérico.
+        // USR-003: Si el email no existe, devolvemos error genérico
         if (usuario == null)
         {
             throw new UnauthorizedException(ErrorCodes.USR_003, "Credenciales incorrectas.");
@@ -107,12 +129,12 @@ public class UserService
             // Si está inactivo y tiene 3 o más intentos, es por bloqueo automático (USR-004)
             if (usuario.IntentosFallidos >= 3)
             {
-                throw new ForbiddenException("USR-004", "Su cuenta fue bloqueada por superar el máximo de intentos fallidos. Contacte a soporte.");
+                throw new ForbiddenException(ErrorCodes.USR_004, "Su cuenta fue bloqueada por superar el máximo de intentos fallidos. Contacte a soporte.");
             }
             // Si está inactivo pero NO llegó a 3 intentos, es una suspensión manual (USR-005)
             else
             {
-                throw new ForbiddenException("USR-005", "Su cuenta fue suspendida por razones de seguridad. Contacte a soporte.");
+                throw new ForbiddenException(ErrorCodes.USR_005, "Su cuenta fue suspendida por razones de seguridad. Contacte a soporte.");
             }
         }
 
@@ -128,7 +150,7 @@ public class UserService
             {
                 usuario.Activo = false; // Bloquear la cuenta
                 await _userRepository.UpdateAsync(usuario);
-                throw new ForbiddenException("USR-004", "Su cuenta fue bloqueada por superar el máximo de intentos fallidos. Contacte a soporte.");
+                throw new ForbiddenException(ErrorCodes.USR_004, "Su cuenta fue bloqueada por superar el máximo de intentos fallidos. Contacte a soporte.");
             }
 
             await _userRepository.UpdateAsync(usuario);
