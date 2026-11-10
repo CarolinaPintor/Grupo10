@@ -260,8 +260,6 @@ Prefijo: `/api/notifications`
 
 Los tipos de notificación admitidos son `Email`, `Push` y `SMS`.
 
-**Nota:** el endpoint `/items` corresponde al CRUD de ejemplo de la plantilla inicial y no forma parte de los cinco dominios del sistema de E-Commerce.
-
 ## **6\. Contrato y catálogo de errores**
 
 La API utiliza un mecanismo centralizado para gestionar las excepciones y mantener un formato uniforme en las respuestas de error.
