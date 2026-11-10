@@ -23,19 +23,19 @@ public class NotificationService
     // Lógica de negocio para enviar/registrar una notificación (NTF-001 y NTF-002)
     public async Task<NotificationResponse> SendAsync(SendNotificationRequest request)
     {
-        // 1. Validación de datos de entrada (NTF-002 -> HTTP 400 Bad Request)
+        //Validación de datos de entrada (NTF-002 -> HTTP 400 Bad Request)
         ValidarRequest(request);
 
-        // 2. Verificar que el usuario destinatario exista (NTF-001 -> HTTP 404 Not Found)
+        //Verificar que el usuario destinatario exista (NTF-001 -> HTTP 404 Not Found)
         var usuario = await _userRepository.GetByIdAsync(request.UsuarioId);
         if (usuario is null)
         {
             throw new NotFoundException(
-                "NTF-001",
+                ErrorCodes.NTF_001,
                 "El usuario destinatario no fue encontrado.");
         }
 
-        // 3. Crear la entidad Notification con estado "Enviada" y persistir en SQLite
+        //Crear la entidad Notification con estado "Enviada" y persistir en SQLite
         var notification = new Notification(
             request.UsuarioId,
             request.Mensaje.Trim(),
@@ -44,7 +44,7 @@ public class NotificationService
 
         await _notificationRepository.CreateAsync(notification);
 
-        // 4. Retornar el DTO de respuesta
+        //Retornar el DTO de respuesta
         return new NotificationResponse
         {
             Id = notification.Id,
@@ -55,34 +55,28 @@ public class NotificationService
             FechaEnvio = notification.FechaEnvio
         };
     }
-    // Consultar historial de notificaciones de un usuario (NTF-001 y NTF-003)
+
+    //Consultar historial de notificaciones de un usuario (NTF-003)
     public async Task<IEnumerable<NotificationResponse>> GetByUserIdAsync(Guid userId)
     {
-        // 1. Verificar que el usuario exista en la base de datos (NTF-001 -> HTTP 404 Not Found)
-        var usuario = await _userRepository.GetByIdAsync(userId);
-        if (usuario is null)
-        {
-            throw new NotFoundException(
-                "NTF-001",
-                "El usuario destinatario no fue encontrado.");
-        }
+        //Saco la validación NTF-001 de acá porque la consigna nos asignaba NTF-003 al GET
 
-        // 2. Buscar las notificaciones registradas para ese usuario
+        //Buscar las notificaciones registradas para ese usuario
         var notificaciones = new List<Notification>();
         foreach (var n in await _notificationRepository.GetByUserIdAsync(userId))
         {
             notificaciones.Add(n);
         }
 
-        // 3. Si no tiene notificaciones registradas, devolver error NTF-003 (HTTP 404 Not Found)
+        //Si no tiene notificaciones registradas, devolver error NTF-003 (HTTP 404 Not Found)
         if (notificaciones.Count == 0)
         {
             throw new NotFoundException(
-                "NTF-003",
+                ErrorCodes.NTF_003,
                 "No se encontraron notificaciones para el usuario.");
         }
 
-        // 4. Mapear las entidades a DTOs de respuesta
+        //Mapear las entidades a DTOs de respuesta
         var respuestas = new List<NotificationResponse>();
         foreach (var n in notificaciones)
         {
@@ -99,6 +93,7 @@ public class NotificationService
 
         return respuestas;
     }
+
     private static bool EsTipoPermitido(string tipo)
     {
         foreach (string permitido in TiposPermitidos)
@@ -117,7 +112,7 @@ public class NotificationService
         if (request is null)
         {
             throw new ValidationException(
-                "NTF-002",
+                ErrorCodes.NTF_002,
                 new[] { "Los datos de la notificación son inválidos." });
         }
 
@@ -148,7 +143,7 @@ public class NotificationService
 
         if (errores.Count > 0)
         {
-            throw new ValidationException("NTF-002", errores);
+            throw new ValidationException(ErrorCodes.NTF_002, errores);
         }
     }
 }
