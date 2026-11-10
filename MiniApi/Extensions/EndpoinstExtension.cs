@@ -7,7 +7,6 @@ public static class EndpointsExtensions
 {
     public static void MapAppEndpoints(this WebApplication app)
     {
-        app.MapItemEndpoints();
         app.MapProductEndpoints();
         app.MapCartEndpoints();
         app.MapOrderEndpoints();

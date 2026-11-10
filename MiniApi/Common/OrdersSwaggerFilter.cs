@@ -209,7 +209,20 @@ public class OrdersSwaggerFilter : IOperationFilter
         }
         """);
 
-        // 3. Ejemplo 409 Conflict (ORD-006)
+        // 3. Ejemplo 400 Bad Request (ORD-002): estado que no existe
+        SetResponseExample(operation, "400", "application/problem+json", $$"""
+        {
+          "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+          "title": "Bad Request",
+          "status": 400,
+          "detail": "La solicitud no es válida.",
+          "instance": "/api/orders/{{OrderId}}/status",
+          "errorCode": "ORD-002",
+          "errorMessage": "El estado 'Perdida' no es válido. Valores permitidos: Pendiente, Confirmada, Enviada, Entregada, Cancelada."
+        }
+        """);
+
+        // 4. Ejemplo 409 Conflict (ORD-006)
         SetResponseExample(operation, "409", "application/problem+json", $$"""
         {
           "type": "https://tools.ietf.org/html/rfc7231#section-6.5.9",
