@@ -317,7 +317,7 @@ El contenido de `type`, `title`, `detail` e `instance` puede variar según la ex
 
 ### **Manejo de errores de formato**
 
-Las solicitudes con datos inválidos o JSON malformado se gestionan mediante las validaciones correspondientes y el manejador `BadRequestExceptionHandler`, cuando corresponda al código de error del dominio.
+Las solicitudes con datos inválidos o JSON malformado se gestionan mediante las validaciones correspondientes y el manejador `BadRequestExceptionHandler`, que responde con el código de error del dominio correspondiente (por ejemplo, `PRD-002` para productos) en todos los entornos.
 
 Los errores inesperados son tratados por el manejador global, que evita exponer detalles internos de la aplicación en las respuestas al cliente.
 ## **7\. Reglas de negocio y seguridad**
