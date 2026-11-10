@@ -1,4 +1,5 @@
-﻿using MiniApi.Data;
+﻿using Microsoft.AspNetCore.Http;
+using MiniApi.Data;
 using MiniApi.ExceptionHandlers;
 using MiniApi.HealthChecks;
 using MiniApi.Services;
@@ -8,6 +9,11 @@ namespace MiniApi.Extensions
 {
     public static class ServicesExtensions
     {
+        private static void ConfigurarRutas(RouteHandlerOptions opciones)
+        {
+            opciones.ThrowOnBadRequest = true;
+        }
+
         public static void AddAppServices(this IServiceCollection services)
         {
             services.AddSingleton<DatabaseInitializer>();
@@ -38,6 +44,9 @@ namespace MiniApi.Extensions
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
+
+            // Sin esto, un JSON malformado solo llega al handler de errores en Development
+            services.Configure<RouteHandlerOptions>(ConfigurarRutas);
 
             services.AddEndpointsApiExplorer();
             services.AddEndpointsApiExplorer();
