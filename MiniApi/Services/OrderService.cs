@@ -51,7 +51,7 @@ namespace MiniApi.Services
             return MapToResponse(order);
         }
 
-        // Convierte una orden del modelo en el DTO de respuesta 
+        // Convierte una orden del modelo en el DTO de respuesta
         private static OrderResponse MapToResponse(Order order)
         {
             var items = new List<OrderItemResponse>();
@@ -72,22 +72,25 @@ namespace MiniApi.Services
 
         public async Task<OrderResponse> CreateAsync(CreateOrderRequest request)
         {
+            // ORD-002: Validar si la lista de ítems es nula, vacía o contiene elementos nulos antes de Data Annotations
+            bool sinItems = request.Items == null || request.Items.Count == 0;
+            bool tieneItemsNulos = request.Items != null && request.Items.Any(i => i == null);
+
+            if (sinItems || tieneItemsNulos)
+            {
+                throw new ValidationException(ErrorCodes.ORD_002, new[] { "Los datos de la orden son inválidos o contienen ítems nulos." });
+            }
+
             // ORD-002: Validar formato de datos o lista de ítems vacía con Data Annotations / Reglas
             List<ValidationResult> resultadosValidacion = new List<ValidationResult>();
             ValidationContext contextoValidacion = new ValidationContext(request);
             bool esValido = Validator.TryValidateObject(request, contextoValidacion, resultadosValidacion, true);
 
-            bool sinItems = request.Items == null || request.Items.Count == 0;
-
-            if (!esValido || request.UsuarioId == Guid.Empty || sinItems)
+            if (!esValido || request.UsuarioId == Guid.Empty)
             {
                 var errores = new List<string>();
 
-                if (sinItems)
-                {
-                    errores.Add("Los datos de la orden son inválidos.");
-                }
-                else if (request.UsuarioId == Guid.Empty)
+                if (request.UsuarioId == Guid.Empty)
                 {
                     errores.Add("El ID del usuario es obligatorio.");
                 }
@@ -102,10 +105,9 @@ namespace MiniApi.Services
                 throw new ValidationException(ErrorCodes.ORD_002, errores);
             }
 
-            // ORD-002: Validator no revisa los ítems anidados, así que valido ProductoId y cantidad acá
+            // ORD-002: valido ProductoId y cantidad acá
             foreach (CreateOrderItemRequest item in request.Items!)
             {
-                // Validar que ProductoId no sea Guid.Empty
                 if (item.ProductoId == Guid.Empty)
                 {
                     throw new ValidationException(ErrorCodes.ORD_002, new[] { "El ID del producto en cada ítem es obligatorio." });
@@ -124,6 +126,7 @@ namespace MiniApi.Services
                 throw new NotFoundException(ErrorCodes.ORD_003, $"El usuario con ID '{request.UsuarioId}' no existe o no está activo.");
             }
 
+            // Consolidar ítems repetidos en una lista simple
             var itemsConsolidados = new List<CreateOrderItemRequest>();
 
             foreach (var itemRecibido in request.Items)
@@ -149,7 +152,7 @@ namespace MiniApi.Services
 
             var orderItems = new List<OrderItem>();
 
-            // Recorrer la lista consolidada validando productos y stock total por producto
+            // Recorrer la lista consolidada validando existencia y stock total por producto
             foreach (var itemDto in itemsConsolidados)
             {
                 var product = await _productRepository.GetByIdAsync(itemDto.ProductoId);
@@ -176,7 +179,7 @@ namespace MiniApi.Services
             // Utilizar el constructor de Order para inicializar la orden y calcular el total automáticamente
             Order nuevaOrden = new Order(request.UsuarioId, orderItems);
 
-            // Guardar la orden y descontar el stock en la base de datos
+            // Guardar la orden y descontar el stock en la base de datos de forma transaccional
             await _orderRepository.AddAsync(nuevaOrden);
 
             // Retornar el DTO de respuesta seguro
@@ -185,7 +188,7 @@ namespace MiniApi.Services
 
         public async Task<UpdateOrderStatusResponse> UpdateStatusAsync(Guid id, UpdateOrderStatusRequest request)
         {
-            // ORD-002: el estado debe ser uno de los permitidos
+            // ORD-002: El estado debe ser uno de los permitidos
             bool estadoValido = false;
             foreach (string estado in EstadosValidos)
             {
@@ -209,7 +212,7 @@ namespace MiniApi.Services
                 throw new NotFoundException(ErrorCodes.ORD_001, "Orden no encontrada.");
             }
 
-            // ORD-006: Validar transición de estados (Ej: Entregada no puede volver a Pendiente)
+            // ORD-006: Validar transición de estados (Entregada no puede volver a Pendiente)
             if (order.Estado == "Entregada" && request.Estado == "Pendiente")
             {
                 throw new BusinessRuleException(
@@ -219,7 +222,7 @@ namespace MiniApi.Services
                 );
             }
 
-            // Impedir que órdenes ya finalizadas (Entregada o Cancelada) cambien a otro estado
+            // ORD-006: Bloquear modificaciones si la orden ya está finalizada (Entregada o Cancelada)
             if (order.Estado == "Entregada" || order.Estado == "Cancelada")
             {
                 throw new BusinessRuleException(
